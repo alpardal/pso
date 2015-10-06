@@ -5,7 +5,6 @@ import {Utils} from './utils';
 import {PSO} from './pso';
 
 function App(goal, canvas) {
-    this.goal = goal;
     this.controls = new Controls(this._settingsChanged.bind(this),
                                  this.start.bind(this),
                                  this.step.bind(this));
@@ -15,6 +14,7 @@ function App(goal, canvas) {
         return position.squareDistance(goal);
     };
     this.pso = new PSO(this.fitnessFunction);
+    this.maxIterations = 100;
     this.running = false;
 }
 
@@ -24,6 +24,7 @@ App.prototype.init = function() {
 };
 
 App.prototype._reset = function() {
+    this.currentIterations = 0;
     this.finished = false;
     this.particles = Utils.initArray(this.settings.numOfParticles,
                                      Particle.createParticle);
@@ -51,7 +52,7 @@ App.prototype._loop = function() {
         this._update();
     }
 
-    if (this._foundGoodSolution()){
+    if (this._shouldStop()){
         this.finished = true;
         this.running = false;
     }
@@ -59,11 +60,21 @@ App.prototype._loop = function() {
     window.requestAnimationFrame(this._loop.bind(this));
 };
 
+App.prototype._shouldStop = function() {
+    return this._foundGoodSolution() ||
+             this._reachedMaxIterations();
+};
+
 App.prototype._foundGoodSolution = function() {
     return this.fitnessFunction(this.gBest) <= 1;
 };
 
+App.prototype._reachedMaxIterations = function() {
+    return this.currentIterations > this.maxIterations;
+};
+
 App.prototype._update = function() {
+    this.currentIterations++;
     this.gBest = this.pso.gBest(this.particles);
     this.particles.forEach(function (p) {
         p.move(this.settings.dt);
