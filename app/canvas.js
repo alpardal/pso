@@ -20,6 +20,10 @@ var Canvas = {
         ctx.fill();
     },
 
+    drawLine: function(p1, p2, color) {
+        this.drawLines([p1, p2], color);
+    },
+
     drawLines: function(points, color) {
         ctx.beginPath();
         ctx.closePath();
