@@ -68,6 +68,10 @@ App.prototype.render = function() {
         if (this.settings.showTrace) {
             Canvas.drawLines(p.posHistory, p.color);
         }
+        if (this.settings.showVelocity) {
+            Canvas.drawLines([p.pos, p.pos.add(p.vel.scale(0.1))],
+                             'darkgray');
+        }
     }, this);
 };
 
