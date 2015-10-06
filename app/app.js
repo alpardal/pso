@@ -44,9 +44,13 @@ App.prototype.settingsChanged = function(settings) {
     this.settings = settings;
 };
 
+App.prototype.findGBest = function() {
+    var candidates = this.particles.map(function(p) {return p.pBest;});
+    return PSO.bestPosition(this.goal, candidates);
+};
+
 App.prototype.update = function() {
-    this.gBest = PSO.bestPosition(this.goal,
-          this.particles.map(function(p) { return p.pBest; }));
+    this.gBest = this.findGBest();
     this.particles.forEach(function (p) {
         p.move(this.settings.dt);
         p.pBest = PSO.bestPosition(this.goal, [p.pBest, p.pos]);
