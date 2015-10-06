@@ -7,13 +7,14 @@ import {PSO} from './pso';
 function App(goal) {
     this.goal = goal;
     this.particleSize = 2;
-    this.controls = new Controls(this.settingsChanged.bind(this));
+    this.controls = new Controls(this.settingsChanged.bind(this),
+                                 this.start.bind(this));
     this.settings = this.controls.currentSettings();
-    this.particles = Utils.range(1, this.settings.numOfParticles)
-                          .map(Particle.createParticle);
 }
 
 App.prototype.start = function() {
+    this.particles = Utils.range(1, this.settings.numOfParticles)
+                          .map(Particle.createParticle);
     this.stopRequested = false;
     this.loop();
 };
