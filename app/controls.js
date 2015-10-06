@@ -4,6 +4,7 @@ var inputs = {
     c2: document.getElementById('c2'),
     k: document.getElementById('k'),
     dt: document.getElementById('dt'),
+    showGBest: document.getElementById('showGBest'),
     showTrace: document.getElementById('showTrace'),
     showVelocity: document.getElementById('showVelocity')
 };
@@ -35,6 +36,7 @@ Controls.prototype.currentSettings = function() {
         c2: floatValue(inputs.c2),
         k: floatValue(inputs.k),
         dt: floatValue(inputs.dt),
+        showGBest: inputs.showGBest.checked,
         showTrace: inputs.showTrace.checked,
         showVelocity: inputs.showVelocity.checked
     };

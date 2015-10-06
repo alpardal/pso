@@ -57,7 +57,10 @@ App.prototype.update = function() {
 
 App.prototype.render = function() {
     Canvas.clearBackground();
-    Canvas.drawCross(this.gBest.x, this.gBest.y, 20, 'black');
+
+    if (this.settings.showGBest) {
+        Canvas.drawCross(this.gBest.x, this.gBest.y, 20, 'black');
+    }
 
     this.particles.forEach(function (p) {
         Canvas.fillCircle(p.pos.x, p.pos.y,
