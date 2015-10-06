@@ -8,9 +8,8 @@ var Canvas = {
 
     height: canvas.height,
 
-    clearBackground: function(color) {
-        ctx.fillStyle = color;
-        ctx.fillRect(0, 0, this.width, this.height)
+    clearBackground: function() {
+        ctx.clearRect(0, 0, this.width, this.height);
     },
 
     fillCircle: function(x, y, radius, color) {
