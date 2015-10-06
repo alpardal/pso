@@ -11,4 +11,18 @@ canvas {
     padding: 10px;
     display: inline-block;
     background-color: #cce;
+    user-select: none;
+    -moz-user-select: none;
+    -webkit-user-select: none;
+}
+
+.control-panel h1 {
+    width: 100%;
+    margin-top: 5px;
+    padding-top: 5px;
+    padding-bottom: 5px;
+    background: white;
+    text-align: center;
+    font-weight: normal;
+    font-size: 12px;
 }
