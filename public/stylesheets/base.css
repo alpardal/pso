@@ -2,6 +2,7 @@ canvas {
     float: left;
     outline: solid thin darkgray;
     cursor: crosshair;
+    background: #eee;
 }
 
 .control-panel {
@@ -9,5 +10,5 @@ canvas {
     margin-left: 10px;
     padding: 10px;
     display: inline-block;
-    background: lightgray;
+    background-color: #cce;
 }
