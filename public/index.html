@@ -6,7 +6,54 @@
     <link rel="stylesheet" href="stylesheets/base.css">
 </head>
 <body>
-    <canvas id="drawing-canvas" width=1000 height=700></canvas>
+    <canvas id="drawing-canvas" width=800 height=600></canvas>
+    <div class="control-panel">
+      <table>
+        <tr>
+          <td>Número de Partículas:</td>
+          <td><input type="text" value="10" id="numberOfParticles" /></td>
+        </tr>
+        <tr>
+          <td>c1:</td>
+          <td><input type="text" value="2" id="c1" /></td>
+        </tr>
+        <tr>
+          <td>c2:</td>
+          <td><input type="text" value="1.5"id="c2" /></td>
+        </tr>
+        <tr>
+          <td>k:</td>
+          <td><input type="text" value="0.8" id="k" /></td>
+        </tr>
+        <tr>
+          <td>dt:</td>
+          <td><input type="text" value="0.001" id="dt" /></td>
+        </tr>
+        <tr>
+          <td><label for="showTrace">
+              <input type="checkbox" id="showTrace" />
+              Traçar?
+              </label>
+            </td>
+        </tr>
+        <tr>
+          <td><label for="showVelocity">
+              <input type="checkbox" id="showVelocity" />
+              Mostrar Velocidades?
+              </label>
+            </td>
+        </tr>
+        <tr>
+          <td>
+            <button id="step">Passo</button>
+          </td>
+          <td>
+          <button id="start-stop">Start</button>
+          </td>
+        </tr>
+      </table>
+
+    </div>
     <script src="javascripts/app.js"></script>
 </body>
 </html>

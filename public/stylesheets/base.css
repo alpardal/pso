@@ -1,4 +1,13 @@
 canvas {
-    cursor: crosshair;
+    float: left;
     outline: solid thin darkgray;
+    cursor: crosshair;
+}
+
+.control-panel {
+    float: left;
+    margin-left: 10px;
+    padding: 10px;
+    display: inline-block;
+    background: lightgray;
 }

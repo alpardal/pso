@@ -21,6 +21,21 @@ var Canvas = {
         ctx.fill();
     },
 
+    drawLines: function(points, color) {
+        ctx.beginPath();
+        ctx.closePath();
+
+        for (var i = 0; i < points.length-1; i++) {
+            var p1 = points[i],
+                p2 = points[i+1];
+            ctx.moveTo(p1.x, p1.y);
+            ctx.lineTo(p2.x, p2.y);
+        }
+
+        ctx.strokeStyle = color;
+        ctx.stroke();
+    },
+
     drawCross: function(x, y, size, color) {
         ctx.beginPath();
         ctx.moveTo(x-size/2, y);

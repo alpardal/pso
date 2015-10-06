@@ -1,18 +1,16 @@
-var Rand = {
+var Utils = {
 
-    float: function(min, max) {
+    randFloat: function(min, max) {
         return min + Math.random() * (max - min);
     },
 
-    int: function(min, max) {
-        return Math.round(Rand.float(min, max));
-    }
-};
+    randInt: function(min, max) {
+        return Math.round(Utils.randFloat(min, max));
+    },
 
-var Arrays = {
-
-    sample: function(array) {
-        return array[Rand.int(0, array.length-1)];
+    randColor: function() {
+        return '#' +
+            Math.floor(Math.random()*16777215).toString(16);
     },
 
     range: function(min, max) {
@@ -26,5 +24,4 @@ var Arrays = {
     }
 };
 
-
-export {Rand, Arrays};
+export {Utils};
