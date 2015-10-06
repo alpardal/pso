@@ -13,14 +13,24 @@ var Utils = {
             Math.floor(Math.random()*16777215).toString(16);
     },
 
-    range: function(min, max) {
+    initArray: function(size, generator) {
         var array = [];
-
-        for (var i = min; i <= max; i++) {
-            array.push(i);
+        for (var i = 0; i < size; i++) {
+            array.push(generator());
         }
-
         return array;
+    },
+
+    minBy: function(items, transform) {
+        return items.map(function(i) {
+            return {item: i, value: transform(i)};
+        }).reduce(function(best, current) {
+            return (current.value < best.value) ? current : best;
+        }).item;
+    },
+
+    accessor: function(propName) {
+        return function(item) { return item[propName]; };
     }
 };
 

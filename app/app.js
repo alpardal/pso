@@ -10,11 +10,15 @@ function App(goal, canvas) {
                                  this.start.bind(this));
     this.settings = this.controls.currentSettings();
     this.graphics = new Graphics(canvas);
+    this.fitnessFunction = function (position) {
+        return position.squareDistance(goal);
+    };
+    this.pso = new PSO(this.fitnessFunction);
 }
 
 App.prototype.start = function() {
-    this.particles = Utils.range(1, this.settings.numOfParticles)
-                          .map(Particle.createParticle);
+    this.particles = Utils.initArray(this.settings.numOfParticles,
+                                     Particle.createParticle);
     this.stopRequested = false;
     this._loop();
 };
@@ -22,10 +26,6 @@ App.prototype.start = function() {
 App.prototype.step = function() {
     this._update();
     this._render();
-};
-
-App.prototype._settingsChanged = function(settings) {
-    this.settings = settings;
 };
 
 App.prototype._loop = function() {
@@ -36,23 +36,21 @@ App.prototype._loop = function() {
     }
 };
 
-App.prototype._shouldStop = function() {
-    return this.stopRequested ||
-            (this.gBest.squareDistance(this.goal) <= 1);
+App.prototype._settingsChanged = function(settings) {
+    this.settings = settings;
 };
 
-App.prototype._findGBest = function() {
-    var candidates = this.particles.map(function(p) {return p.pBest;});
-    return PSO.bestPosition(this.goal, candidates);
+App.prototype._shouldStop = function() {
+    return this.stopRequested || (this.fitnessFunction(this.gBest) <= 1);
 };
 
 App.prototype._update = function() {
-    this.gBest = this._findGBest();
+    this.gBest = this.pso.gBest(this.particles);
     this.particles.forEach(function (p) {
         p.move(this.settings.dt);
-        p.pBest = PSO.bestPosition(this.goal, [p.pBest, p.pos]);
-        p.vel = PSO.newVelocity(p, this.gBest, this.settings.c1,
-                                this.settings.c2, this.settings.k);
+        p.pBest = this.pso.fittestPosition([p.pBest, p.pos]);
+        p.vel = this.pso.newVelocity(p, this.gBest, this.settings.c1,
+                                     this.settings.c2, this.settings.k);
     }, this);
 };
 
