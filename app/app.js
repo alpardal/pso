@@ -62,6 +62,10 @@ App.prototype.update = function() {
 
 App.prototype.render = function() {
     Canvas.clearBackground();
+    Canvas.drawLines([{x: Canvas.width/2, y: 0},
+                      {x: Canvas.width/2, y: Canvas.height}], 'white');
+    Canvas.drawLines([{x: 0, y: Canvas.height/2},
+                      {x: Canvas.width, y: Canvas.height/2}], 'white');
 
     if (this.settings.showGBest) {
         Canvas.drawCross(this.gBest.x, this.gBest.y, 20, 'black');
