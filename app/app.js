@@ -7,41 +7,60 @@ import {PSO} from './pso';
 function App(goal, canvas) {
     this.goal = goal;
     this.controls = new Controls(this._settingsChanged.bind(this),
-                                 this.start.bind(this));
+                                 this.start.bind(this),
+                                 this.step.bind(this));
     this.settings = this.controls.currentSettings();
     this.graphics = new Graphics(canvas);
     this.fitnessFunction = function (position) {
         return position.squareDistance(goal);
     };
     this.pso = new PSO(this.fitnessFunction);
+    this.running = false;
 }
 
-App.prototype.start = function() {
-    this.particles = Utils.initArray(this.settings.numOfParticles,
-                                     Particle.createParticle);
-    this.stopRequested = false;
+App.prototype.init = function() {
+    this._reset();
     this._loop();
 };
 
+App.prototype._reset = function() {
+    this.finished = false;
+    this.particles = Utils.initArray(this.settings.numOfParticles,
+                                     Particle.createParticle);
+    this.gBest = this.pso.gBest(this.particles);
+};
+
+App.prototype.start = function() {
+    if (this.finished) { this._reset(); }
+    this.running = true;
+};
+
 App.prototype.step = function() {
+    if (this.finished) {
+        this._reset();
+    }
+
+    this.running = false;
     this._update();
-    this._render();
 };
 
 App.prototype._loop = function() {
-    this.step();
+    this._render();
 
-    if (!this._shouldStop()) {
-        window.requestAnimationFrame(this._loop.bind(this));
+    if (this.running) {
+        this._update();
     }
+
+    if (this._foundGoodSolution()){
+        this.finished = true;
+        this.running = false;
+    }
+
+    window.requestAnimationFrame(this._loop.bind(this));
 };
 
-App.prototype._settingsChanged = function(settings) {
-    this.settings = settings;
-};
-
-App.prototype._shouldStop = function() {
-    return this.stopRequested || (this.fitnessFunction(this.gBest) <= 1);
+App.prototype._foundGoodSolution = function() {
+    return this.fitnessFunction(this.gBest) <= 1;
 };
 
 App.prototype._update = function() {
@@ -72,6 +91,10 @@ App.prototype._render = function() {
             this.graphics.drawVelocity(p);
         }
     }, this);
+};
+
+App.prototype._settingsChanged = function(settings) {
+    this.settings = settings;
 };
 
 export {App};
