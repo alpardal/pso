@@ -13,30 +13,24 @@ var _utils = require('./utils');
 
 var _pso = require('./pso');
 
+var _viewport = require('./viewport');
+
 var _logger = require('./logger');
 
-function sombrero(x, y) {
-    var x2 = x * x,
-        y2 = y * y;
+function sombrero(position) {
+    var x2 = position.x * position.x,
+        y2 = position.y * position.y;
     return 6 * Math.cos(Math.sqrt(x2 + y2)) / (x2 + y2 + 6);
-}
-
-function createFitnessFunction(screenWidth, screenHeight) {
-    var logicWidth = 12,
-        logicHeight = logicWidth * screenHeight / screenWidth;
-
-    return function (screenPosition) {
-        var logicX = _utils.Utils.mapCoordinate(screenPosition.x, screenWidth, -logicWidth / 2, logicWidth / 2),
-            logicY = _utils.Utils.mapCoordinate(screenPosition.y, screenHeight, logicHeight / 2, -logicHeight / 2);
-        return sombrero(logicX, logicY);
-    };
 }
 
 function App(canvas) {
     this.controls = new _controls.Controls(this._settingsChanged.bind(this), this.start.bind(this), this.step.bind(this));
     this.settings = this.controls.currentSettings();
     this.graphics = new _graphics.Graphics(canvas);
-    this.fitnessFunction = createFitnessFunction(canvas.width, canvas.height);
+    this.viewport = new _viewport.Viewport(canvas, 12);
+    this.fitnessFunction = (function (position) {
+        return sombrero(this.viewport.toLogicCoordinates(position));
+    }).bind(this);
     this.running = false;
 }
 
@@ -115,7 +109,7 @@ App.prototype._render = function () {
 
 App.prototype._logGBest = function () {
     var value = this.fitnessFunction(this.pso.gBest);
-    _logger.Logger.setText('Valor máximo atual: ' + value);
+    _logger.Logger.setText('Valor máximo atual: ' + value.toFixed(5) + ' em ' + this.viewport.toLogicCoordinates(this.pso.gBest).toString());
 };
 
 App.prototype._settingsChanged = function (settings) {
@@ -124,7 +118,7 @@ App.prototype._settingsChanged = function (settings) {
 
 exports.App = App;
 
-},{"./controls":3,"./graphics":4,"./logger":5,"./particle":7,"./pso":8,"./utils":9}],2:[function(require,module,exports){
+},{"./controls":3,"./graphics":4,"./logger":5,"./particle":7,"./pso":8,"./utils":9,"./viewport":11}],2:[function(require,module,exports){
 'use strict';
 
 exports.__esModule = true;
@@ -423,8 +417,8 @@ var Utils = {
         }).item;
     },
 
-    mapCoordinate: function mapCoordinate(value, screenSize, min, max) {
-        return min + (max - min) * value / screenSize;
+    interpolate: function interpolate(value, max, newMin, newMax) {
+        return newMin + (newMax - newMin) * value / max;
     },
 
     accessor: function accessor(propName) {
@@ -437,7 +431,7 @@ var Utils = {
 exports.Utils = Utils;
 
 },{}],10:[function(require,module,exports){
-"use strict";
+'use strict';
 
 exports.__esModule = true;
 var Vector = function Vector(coords) {
@@ -464,6 +458,35 @@ Vector.prototype.squareDistance = function (other) {
     return Math.pow(this.x - other.x, 2) + Math.pow(this.y - other.y, 2);
 };
 
+Vector.prototype.toString = function () {
+    return '(' + this.x.toFixed(2) + ', ' + this.y.toFixed(2) + ')';
+};
+
 exports.Vector = Vector;
 
-},{}]},{},[1,2,3,4,5,6,7,8,9,10]);
+},{}],11:[function(require,module,exports){
+'use strict';
+
+exports.__esModule = true;
+
+var _utils = require('./utils');
+
+var _vector = require('./vector');
+
+function Viewport(canvas, logicWidth) {
+    this.screenWidth = canvas.width;
+    this.screenHeight = canvas.height;
+    this.logicWidth = logicWidth;
+    this.logicHeight = logicWidth * this.screenHeight / this.screenWidth;
+}
+
+Viewport.prototype.toLogicCoordinates = function (screenPosition) {
+    var logicX = _utils.Utils.interpolate(screenPosition.x, this.screenWidth, -this.logicWidth / 2, this.logicWidth / 2),
+        logicY = _utils.Utils.interpolate(screenPosition.y, this.screenHeight, this.logicHeight / 2, -this.logicHeight / 2);
+
+    return new _vector.Vector({ x: logicX, y: logicY });
+};
+
+exports.Viewport = Viewport;
+
+},{"./utils":9,"./vector":10}]},{},[1,2,3,4,5,6,7,8,9,10,11]);

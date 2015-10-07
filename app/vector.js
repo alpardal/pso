@@ -23,4 +23,8 @@ Vector.prototype.squareDistance = function(other) {
             Math.pow(this.y - other.y, 2);
 };
 
+Vector.prototype.toString = function() {
+    return '(' + this.x.toFixed(2) + ', ' + this.y.toFixed(2) + ')';
+};
+
 export {Vector};

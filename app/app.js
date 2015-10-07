@@ -3,24 +3,13 @@ import {Graphics} from './graphics';
 import {Particle} from './particle';
 import {Utils} from './utils';
 import {PSO} from './pso';
+import {Viewport} from './viewport';
 import {Logger} from './logger';
 
-function sombrero(x, y) {
-    var x2 = x*x, y2 = y*y;
+function sombrero(position) {
+    var x2 = position.x * position.x,
+        y2 = position.y * position.y;
     return 6 * Math.cos(Math.sqrt(x2 + y2)) / (x2 + y2 + 6);
-}
-
-function createFitnessFunction(screenWidth, screenHeight) {
-    var logicWidth = 12,
-        logicHeight = logicWidth * screenHeight/screenWidth;
-
-    return function(screenPosition) {
-        var logicX = Utils.mapCoordinate(screenPosition.x, screenWidth,
-                                         -logicWidth/2, logicWidth/2),
-            logicY = Utils.mapCoordinate(screenPosition.y, screenHeight,
-                                         logicHeight/2, -logicHeight/2);
-        return sombrero(logicX, logicY);
-    }
 }
 
 function App(canvas) {
@@ -29,7 +18,10 @@ function App(canvas) {
                                  this.step.bind(this));
     this.settings = this.controls.currentSettings();
     this.graphics = new Graphics(canvas);
-    this.fitnessFunction = createFitnessFunction(canvas.width, canvas.height);
+    this.viewport = new Viewport(canvas, 12);
+    this.fitnessFunction = function(position) {
+        return sombrero(this.viewport.toLogicCoordinates(position));
+    }.bind(this);
     this.running = false;
 }
 
@@ -105,7 +97,8 @@ App.prototype._render = function() {
 
 App.prototype._logGBest = function() {
     var value = this.fitnessFunction(this.pso.gBest);
-    Logger.setText('Valor máximo atual: ' + value);
+    Logger.setText('Valor máximo atual: ' + value.toFixed(5) +
+      ' em ' + this.viewport.toLogicCoordinates(this.pso.gBest).toString());
 };
 
 App.prototype._settingsChanged = function(settings) {

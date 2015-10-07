@@ -29,8 +29,8 @@ var Utils = {
         }).item;
     },
 
-    mapCoordinate: function(value, screenSize, min, max) {
-        return min + (max - min) * value / screenSize;
+    interpolate: function(value, max, newMin, newMax) {
+        return newMin + (newMax - newMin) * value/max;
     },
 
     accessor: function(propName) {
