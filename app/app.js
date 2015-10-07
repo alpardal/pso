@@ -9,7 +9,7 @@ import {Logger} from './logger';
 function sombrero(position) {
     var x2 = position.x * position.x,
         y2 = position.y * position.y;
-    return 6 * Math.cos(Math.sqrt(x2 + y2)) / (x2 + y2 + 6);
+    return Math.sin(Math.sqrt(x2 + y2)) / Math.sqrt(x2 + y2);
 }
 
 function App(canvas) {
