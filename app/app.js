@@ -3,16 +3,33 @@ import {Graphics} from './graphics';
 import {Particle} from './particle';
 import {Utils} from './utils';
 import {PSO} from './pso';
+import {Logger} from './logger';
 
-function App(goal, canvas) {
+function sombrero(x, y) {
+    var x2 = x*x, y2 = y*y;
+    return 6 * Math.cos(Math.sqrt(x2 + y2)) / (x2 + y2 + 6);
+}
+
+function createFitnessFunction(screenWidth, screenHeight) {
+    var logicWidth = 12,
+        logicHeight = logicWidth * screenHeight/screenWidth;
+
+    return function(screenPosition) {
+        var logicX = Utils.mapCoordinate(screenPosition.x, screenWidth,
+                                         -logicWidth/2, logicWidth/2),
+            logicY = Utils.mapCoordinate(screenPosition.y, screenHeight,
+                                         logicHeight/2, -logicHeight/2);
+        return sombrero(logicX, logicY);
+    }
+}
+
+function App(canvas) {
     this.controls = new Controls(this._settingsChanged.bind(this),
                                  this.start.bind(this),
                                  this.step.bind(this));
     this.settings = this.controls.currentSettings();
     this.graphics = new Graphics(canvas);
-    this.fitnessFunction = function (position) {
-        return position.squareDistance(goal);
-    };
+    this.fitnessFunction = createFitnessFunction(canvas.width, canvas.height);
     this.running = false;
 }
 
@@ -27,6 +44,7 @@ App.prototype._reset = function() {
     var particles = Utils.initArray(this.settings.numOfParticles,
                                      Particle.createParticle);
     this.pso = new PSO(particles, this.fitnessFunction);
+    Logger.clear();
 };
 
 App.prototype.start = function() {
@@ -47,16 +65,12 @@ App.prototype._loop = function() {
         this._update();
     }
 
-    if (this._shouldStop()){
+    if (this._reachedMaxIterations()){
         this.finished = true;
         this.running = false;
     }
 
     window.requestAnimationFrame(this._loop.bind(this));
-};
-
-App.prototype._shouldStop = function() {
-    return this.pso.foundGoodSolution() || this._reachedMaxIterations();
 };
 
 App.prototype._reachedMaxIterations = function() {
@@ -66,6 +80,7 @@ App.prototype._reachedMaxIterations = function() {
 App.prototype._update = function() {
     this.currentIterations++;
     this.pso.update(this.settings);
+    this._logGBest();
 };
 
 App.prototype._render = function() {
@@ -86,6 +101,11 @@ App.prototype._render = function() {
     if (this.settings.showGBest) {
         this.graphics.drawGBest(this.pso.gBest);
     }
+};
+
+App.prototype._logGBest = function() {
+    var value = this.fitnessFunction(this.pso.gBest);
+    Logger.setText('Valor máximo atual: ' + value);
 };
 
 App.prototype._settingsChanged = function(settings) {

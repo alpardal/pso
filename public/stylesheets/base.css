@@ -5,11 +5,14 @@ canvas {
     background: #eee;
 }
 
-.control-panel {
+.sidebar {
+    display: inline-block;
     float: left;
     margin-left: 10px;
+}
+
+.control-panel {
     padding: 10px;
-    display: inline-block;
     background-color: #cce;
     user-select: none;
     -moz-user-select: none;

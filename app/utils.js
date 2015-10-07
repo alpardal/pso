@@ -21,12 +21,16 @@ var Utils = {
         return array;
     },
 
-    minBy: function(items, transform) {
+    maxBy: function(items, transform) {
         return items.map(function(i) {
             return {item: i, value: transform(i)};
         }).reduce(function(best, current) {
-            return (current.value < best.value) ? current : best;
+            return (current.value > best.value) ? current : best;
         }).item;
+    },
+
+    mapCoordinate: function(value, screenSize, min, max) {
+        return min + (max - min) * value / screenSize;
     },
 
     accessor: function(propName) {

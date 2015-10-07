@@ -13,13 +13,30 @@ var _utils = require('./utils');
 
 var _pso = require('./pso');
 
-function App(goal, canvas) {
+var _logger = require('./logger');
+
+function sombrero(x, y) {
+    var x2 = x * x,
+        y2 = y * y;
+    return 6 * Math.cos(Math.sqrt(x2 + y2)) / (x2 + y2 + 6);
+}
+
+function createFitnessFunction(screenWidth, screenHeight) {
+    var logicWidth = 12,
+        logicHeight = logicWidth * screenHeight / screenWidth;
+
+    return function (screenPosition) {
+        var logicX = _utils.Utils.mapCoordinate(screenPosition.x, screenWidth, -logicWidth / 2, logicWidth / 2),
+            logicY = _utils.Utils.mapCoordinate(screenPosition.y, screenHeight, logicHeight / 2, -logicHeight / 2);
+        return sombrero(logicX, logicY);
+    };
+}
+
+function App(canvas) {
     this.controls = new _controls.Controls(this._settingsChanged.bind(this), this.start.bind(this), this.step.bind(this));
     this.settings = this.controls.currentSettings();
     this.graphics = new _graphics.Graphics(canvas);
-    this.fitnessFunction = function (position) {
-        return position.squareDistance(goal);
-    };
+    this.fitnessFunction = createFitnessFunction(canvas.width, canvas.height);
     this.running = false;
 }
 
@@ -33,6 +50,7 @@ App.prototype._reset = function () {
     this.finished = false;
     var particles = _utils.Utils.initArray(this.settings.numOfParticles, _particle.Particle.createParticle);
     this.pso = new _pso.PSO(particles, this.fitnessFunction);
+    _logger.Logger.clear();
 };
 
 App.prototype.start = function () {
@@ -57,16 +75,12 @@ App.prototype._loop = function () {
         this._update();
     }
 
-    if (this._shouldStop()) {
+    if (this._reachedMaxIterations()) {
         this.finished = true;
         this.running = false;
     }
 
     window.requestAnimationFrame(this._loop.bind(this));
-};
-
-App.prototype._shouldStop = function () {
-    return this.pso.foundGoodSolution() || this._reachedMaxIterations();
 };
 
 App.prototype._reachedMaxIterations = function () {
@@ -76,6 +90,7 @@ App.prototype._reachedMaxIterations = function () {
 App.prototype._update = function () {
     this.currentIterations++;
     this.pso.update(this.settings);
+    this._logGBest();
 };
 
 App.prototype._render = function () {
@@ -98,13 +113,18 @@ App.prototype._render = function () {
     }
 };
 
+App.prototype._logGBest = function () {
+    var value = this.fitnessFunction(this.pso.gBest);
+    _logger.Logger.setText('Valor máximo atual: ' + value);
+};
+
 App.prototype._settingsChanged = function (settings) {
     this.settings = settings;
 };
 
 exports.App = App;
 
-},{"./controls":3,"./graphics":4,"./particle":6,"./pso":7,"./utils":8}],2:[function(require,module,exports){
+},{"./controls":3,"./graphics":4,"./logger":5,"./particle":7,"./pso":8,"./utils":9}],2:[function(require,module,exports){
 'use strict';
 
 exports.__esModule = true;
@@ -264,17 +284,33 @@ exports.Graphics = Graphics;
 },{}],5:[function(require,module,exports){
 'use strict';
 
-var _canvas = require('./canvas');
+exports.__esModule = true;
+var output = document.getElementById('output');
 
-var _vector = require('./vector');
+var Logger = {
+
+    clear: function clear() {
+        output.textContent = '';
+    },
+
+    setText: function setText(text) {
+        output.textContent = text;
+    }
+};
+
+exports.Logger = Logger;
+
+},{}],6:[function(require,module,exports){
+'use strict';
+
+var _canvas = require('./canvas');
 
 var _app = require('./app');
 
-var goal = new _vector.Vector({ x: _canvas.Canvas.width / 2, y: _canvas.Canvas.height / 2 }),
-    app = new _app.App(goal, _canvas.Canvas);
+var app = new _app.App(_canvas.Canvas);
 app.init();
 
-},{"./app":1,"./canvas":2,"./vector":9}],6:[function(require,module,exports){
+},{"./app":1,"./canvas":2}],7:[function(require,module,exports){
 'use strict';
 
 exports.__esModule = true;
@@ -315,7 +351,7 @@ Particle.createParticle = function () {
 
 exports.Particle = Particle;
 
-},{"./canvas":2,"./utils":8,"./vector":9}],7:[function(require,module,exports){
+},{"./canvas":2,"./utils":9,"./vector":10}],8:[function(require,module,exports){
 'use strict';
 
 exports.__esModule = true;
@@ -337,16 +373,12 @@ PSO.prototype.update = function (settings) {
     this.gBest = this._calculateGBest();
 };
 
-PSO.prototype.foundGoodSolution = function () {
-    return this.fitnessFunction(this.gBest) <= 1;
-};
-
 PSO.prototype._calculateGBest = function () {
     return this._fittestPosition(this.particles.map(_utils.Utils.accessor('pBest')));
 };
 
 PSO.prototype._fittestPosition = function (positions) {
-    return _utils.Utils.minBy(positions, this.fitnessFunction);
+    return _utils.Utils.maxBy(positions, this.fitnessFunction);
 };
 
 PSO.prototype._newVelocity = function (particle, gBest, c1, c2, k) {
@@ -357,7 +389,7 @@ PSO.prototype._newVelocity = function (particle, gBest, c1, c2, k) {
 
 exports.PSO = PSO;
 
-},{"./utils":8}],8:[function(require,module,exports){
+},{"./utils":9}],9:[function(require,module,exports){
 'use strict';
 
 exports.__esModule = true;
@@ -383,12 +415,16 @@ var Utils = {
         return array;
     },
 
-    minBy: function minBy(items, transform) {
+    maxBy: function maxBy(items, transform) {
         return items.map(function (i) {
             return { item: i, value: transform(i) };
         }).reduce(function (best, current) {
-            return current.value < best.value ? current : best;
+            return current.value > best.value ? current : best;
         }).item;
+    },
+
+    mapCoordinate: function mapCoordinate(value, screenSize, min, max) {
+        return min + (max - min) * value / screenSize;
     },
 
     accessor: function accessor(propName) {
@@ -400,7 +436,7 @@ var Utils = {
 
 exports.Utils = Utils;
 
-},{}],9:[function(require,module,exports){
+},{}],10:[function(require,module,exports){
 "use strict";
 
 exports.__esModule = true;
@@ -430,4 +466,4 @@ Vector.prototype.squareDistance = function (other) {
 
 exports.Vector = Vector;
 
-},{}]},{},[1,2,3,4,5,6,7,8,9]);
+},{}]},{},[1,2,3,4,5,6,7,8,9,10]);

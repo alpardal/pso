@@ -2,75 +2,80 @@
 <html lang="en">
 <head>
     <meta charset="utf-8">
-    <title>PSO</title>
+    <title>PSO - Sombrero Mexicano</title>
     <link rel="stylesheet" href="stylesheets/base.css">
 </head>
 <body>
     <canvas id="drawing-canvas" width=800 height=600></canvas>
-    <div class="control-panel">
-      <h1>
-        V<sub>t+1</sub> = k &times V<sub>t</sub> +
-        c<sub>1</sub> &times rand() &times (gBest<sub>t</sub> - P<sub>t</sub>)
-         + c<sub>2</sub> &times rand() &times (pBest<sub>t</sub>
-        - P<sub>t</sub>)
-        <hr>
-        P<sub>t+1</sub> = P<sub>t</sub> + V<sub>t</sub> &times dt
-      </h1>
-      <table>
-        <tr>
-          <td>Número de Partículas:</td>
-          <td><input type="text" value="10" id="numberOfParticles" /></td>
-        </tr>
-        <tr>
-          <td>c1:</td>
-          <td><input type="text" value="2" id="c1" /></td>
-        </tr>
-        <tr>
-          <td>c2:</td>
-          <td><input type="text" value="1.5"id="c2" /></td>
-        </tr>
-        <tr>
-          <td>k:</td>
-          <td><input type="text" value="0.9" id="k" /></td>
-        </tr>
-        <tr>
-          <td>dt:</td>
-          <td><input type="text" value="0.01" id="dt" /></td>
-        </tr>
-        <tr>
-          <td>Max. iterações:</td>
-          <td><input type="text" value="100" id="maxIterations" /></td>
-        </tr>
-        <tr>
-          <td><label for="showGBest">
-              <input type="checkbox" id="showGBest" checked />
-              Mostrar gBest?
-              </label>
+    <div class="sidebar">
+      <div class="control-panel">
+        <h1>
+          V<sub>t+1</sub> = k &times V<sub>t</sub> +
+          c<sub>1</sub> &times rand() &times (gBest<sub>t</sub> - P<sub>t</sub>)
+           + c<sub>2</sub> &times rand() &times (pBest<sub>t</sub>
+          - P<sub>t</sub>)
+          <hr>
+          P<sub>t+1</sub> = P<sub>t</sub> + V<sub>t</sub> &times dt
+        </h1>
+        <table>
+          <tr>
+            <td>Número de Partículas:</td>
+            <td><input type="text" value="10" id="numberOfParticles" /></td>
+          </tr>
+          <tr>
+            <td>c1:</td>
+            <td><input type="text" value="2" id="c1" /></td>
+          </tr>
+          <tr>
+            <td>c2:</td>
+            <td><input type="text" value="1.5"id="c2" /></td>
+          </tr>
+          <tr>
+            <td>k:</td>
+            <td><input type="text" value="0.9" id="k" /></td>
+          </tr>
+          <tr>
+            <td>dt:</td>
+            <td><input type="text" value="0.01" id="dt" /></td>
+          </tr>
+          <tr>
+            <td>Max. iterações:</td>
+            <td><input type="text" value="100" id="maxIterations" /></td>
+          </tr>
+          <tr>
+            <td><label for="showGBest">
+                <input type="checkbox" id="showGBest" checked />
+                Mostrar gBest?
+                </label>
+              </td>
+          </tr>
+          <tr>
+            <td><label for="showTrace">
+                <input type="checkbox" id="showTrace" />
+                Traçar?
+                </label>
+              </td>
+          </tr>
+          <tr>
+            <td><label for="showVelocity">
+                <input type="checkbox" id="showVelocity" />
+                Mostrar Velocidades?
+                </label>
+              </td>
+          </tr>
+          <tr>
+            <td>
+              <button id="stepButton">Passo</button>
             </td>
-        </tr>
-        <tr>
-          <td><label for="showTrace">
-              <input type="checkbox" id="showTrace" />
-              Traçar?
-              </label>
+            <td>
+            <button id="startButton">Start</button>
             </td>
-        </tr>
-        <tr>
-          <td><label for="showVelocity">
-              <input type="checkbox" id="showVelocity" />
-              Mostrar Velocidades?
-              </label>
-            </td>
-        </tr>
-        <tr>
-          <td>
-            <button id="stepButton">Passo</button>
-          </td>
-          <td>
-          <button id="startButton">Start</button>
-          </td>
-        </tr>
-      </table>
+          </tr>
+        </table>
+
+      </div>
+
+      <p id="output"></p>
 
     </div>
     <script src="javascripts/app.js"></script>

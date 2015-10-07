@@ -16,16 +16,12 @@ PSO.prototype.update = function(settings) {
     this.gBest = this._calculateGBest();
 };
 
-PSO.prototype.foundGoodSolution = function() {
-    return this.fitnessFunction(this.gBest) <= 1;
-};
-
 PSO.prototype._calculateGBest = function() {
     return this._fittestPosition(this.particles.map(Utils.accessor('pBest')));
 };
 
 PSO.prototype._fittestPosition = function(positions) {
-    return Utils.minBy(positions, this.fitnessFunction);
+    return Utils.maxBy(positions, this.fitnessFunction);
 };
 
 PSO.prototype._newVelocity = function(particle, gBest, c1, c2, k) {
