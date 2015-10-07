@@ -13,7 +13,6 @@ function App(goal, canvas) {
     this.fitnessFunction = function (position) {
         return position.squareDistance(goal);
     };
-    this.maxIterations = 100;
     this.running = false;
 }
 
@@ -61,7 +60,7 @@ App.prototype._shouldStop = function() {
 };
 
 App.prototype._reachedMaxIterations = function() {
-    return this.currentIterations > this.maxIterations;
+    return this.currentIterations > this.settings.maxIterations;
 };
 
 App.prototype._update = function() {
