@@ -29,3 +29,8 @@ canvas {
     font-weight: normal;
     font-size: 12px;
 }
+
+.image-link {
+    clear: both;
+    padding-top: 10px;
+}
