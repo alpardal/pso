@@ -9,12 +9,12 @@
     <canvas id="drawing-canvas" width=800 height=600></canvas>
     <div class="control-panel">
       <h1>
-        V<sub>x</sub> = k &times V<sub>x</sub> +
-        c<sub>1</sub> &times rand() &times (gBest<sub>x</sub> - P<sub>x</sub>)
-         + c<sub>2</sub> &times rand() &times (pBest<sub>x</sub>
-        - P<sub>x</sub>)
+        V<sub>t+1</sub> = k &times V<sub>t</sub> +
+        c<sub>1</sub> &times rand() &times (gBest<sub>t</sub> - P<sub>t</sub>)
+         + c<sub>2</sub> &times rand() &times (pBest<sub>t</sub>
+        - P<sub>t</sub>)
         <hr>
-        P<sub>x</sub> = P<sub>x</sub> + V<sub>x</sub> &times dt
+        P<sub>t+1</sub> = P<sub>t</sub> + V<sub>t</sub> &times dt
       </h1>
       <table>
         <tr>
