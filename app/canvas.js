@@ -1,3 +1,4 @@
+import {Vector} from './vector';
 
 var canvas = document.getElementById('drawing-canvas'),
     ctx = canvas.getContext('2d');
@@ -48,8 +49,13 @@ var Canvas = {
         ctx.closePath();
         ctx.strokeStyle = color;
         ctx.stroke();
-    }
+    },
 
+    addHoverTrackingFunction: function(fun) {
+        canvas.addEventListener('mousemove', function(event) {
+            fun(new Vector({x: event.offsetX, y: event.offsetY}));
+        });
+    }
 };
 
 export {Canvas};

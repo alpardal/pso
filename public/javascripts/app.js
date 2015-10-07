@@ -31,6 +31,9 @@ function App(canvas) {
     this.fitnessFunction = (function (position) {
         return sombrero(this.viewport.toLogicCoordinates(position));
     }).bind(this);
+    canvas.addHoverTrackingFunction((function (pos) {
+        console.log(this.fitnessFunction(pos).toFixed(5) + ' @ ' + this.viewport.toLogicCoordinates(pos));
+    }).bind(this));
     this.running = false;
 }
 
@@ -123,6 +126,8 @@ exports.App = App;
 
 exports.__esModule = true;
 
+var _vector = require('./vector');
+
 var canvas = document.getElementById('drawing-canvas'),
     ctx = canvas.getContext('2d');
 
@@ -172,13 +177,18 @@ var Canvas = {
         ctx.closePath();
         ctx.strokeStyle = color;
         ctx.stroke();
-    }
+    },
 
+    addHoverTrackingFunction: function addHoverTrackingFunction(fun) {
+        canvas.addEventListener('mousemove', function (event) {
+            fun(new _vector.Vector({ x: event.offsetX, y: event.offsetY }));
+        });
+    }
 };
 
 exports.Canvas = Canvas;
 
-},{}],3:[function(require,module,exports){
+},{"./vector":10}],3:[function(require,module,exports){
 'use strict';
 
 exports.__esModule = true;

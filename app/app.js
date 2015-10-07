@@ -22,6 +22,10 @@ function App(canvas) {
     this.fitnessFunction = function(position) {
         return sombrero(this.viewport.toLogicCoordinates(position));
     }.bind(this);
+    canvas.addHoverTrackingFunction(function(pos) {
+        console.log(this.fitnessFunction(pos).toFixed(5) + ' @ ' +
+                    this.viewport.toLogicCoordinates(pos));
+    }.bind(this));
     this.running = false;
 }
 
