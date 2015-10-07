@@ -13,7 +13,6 @@ function App(goal, canvas) {
     this.fitnessFunction = function (position) {
         return position.squareDistance(goal);
     };
-    this.pso = new PSO(this.fitnessFunction);
     this.maxIterations = 100;
     this.running = false;
 }
@@ -26,9 +25,9 @@ App.prototype.init = function() {
 App.prototype._reset = function() {
     this.currentIterations = 0;
     this.finished = false;
-    this.particles = Utils.initArray(this.settings.numOfParticles,
+    var particles = Utils.initArray(this.settings.numOfParticles,
                                      Particle.createParticle);
-    this.gBest = this.pso.gBest(this.particles);
+    this.pso = new PSO(particles, this.fitnessFunction);
 };
 
 App.prototype.start = function() {
@@ -37,10 +36,7 @@ App.prototype.start = function() {
 };
 
 App.prototype.step = function() {
-    if (this.finished) {
-        this._reset();
-    }
-
+    if (this.finished) { this._reset(); }
     this.running = false;
     this._update();
 };
@@ -61,12 +57,7 @@ App.prototype._loop = function() {
 };
 
 App.prototype._shouldStop = function() {
-    return this._foundGoodSolution() ||
-             this._reachedMaxIterations();
-};
-
-App.prototype._foundGoodSolution = function() {
-    return this.fitnessFunction(this.gBest) <= 1;
+    return this.pso.foundGoodSolution() || this._reachedMaxIterations();
 };
 
 App.prototype._reachedMaxIterations = function() {
@@ -75,23 +66,13 @@ App.prototype._reachedMaxIterations = function() {
 
 App.prototype._update = function() {
     this.currentIterations++;
-    this.gBest = this.pso.gBest(this.particles);
-    this.particles.forEach(function (p) {
-        p.move(this.settings.dt);
-        p.pBest = this.pso.fittestPosition([p.pBest, p.pos]);
-        p.vel = this.pso.newVelocity(p, this.gBest, this.settings.c1,
-                                     this.settings.c2, this.settings.k);
-    }, this);
+    this.pso.update(this.settings);
 };
 
 App.prototype._render = function() {
     this.graphics.drawBackground();
 
-    if (this.settings.showGBest) {
-        this.graphics.drawGBest(this.gBest);
-    }
-
-    this.particles.forEach(function(p) {
+    this.pso.particles.forEach(function(p) {
         this.graphics.drawParticle(p);
 
         if (this.settings.showTrace) {
@@ -102,6 +83,10 @@ App.prototype._render = function() {
             this.graphics.drawVelocity(p);
         }
     }, this);
+
+    if (this.settings.showGBest) {
+        this.graphics.drawGBest(this.pso.gBest);
+    }
 };
 
 App.prototype._settingsChanged = function(settings) {
