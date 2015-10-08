@@ -24,7 +24,7 @@ function sombrero(position) {
 }
 
 function App(canvas) {
-    this.controls = new _controls.Controls(this._settingsChanged.bind(this), this.start.bind(this), this.step.bind(this));
+    this.controls = new _controls.Controls(this._settingsChanged.bind(this), this.run.bind(this), this.step.bind(this));
     this.settings = this.controls.currentSettings();
     this.graphics = new _graphics.Graphics(canvas);
     this.viewport = new _viewport.Viewport(canvas, 12);
@@ -50,7 +50,7 @@ App.prototype._reset = function () {
     _logger.Logger.clear();
 };
 
-App.prototype.start = function () {
+App.prototype.run = function () {
     if (this.finished) {
         this._reset();
     }
@@ -204,7 +204,7 @@ var inputs = {
     showVelocity: document.getElementById('showVelocity')
 },
     buttons = {
-    start: document.getElementById('startButton'),
+    run: document.getElementById('runButton'),
     step: document.getElementById('stepButton')
 };
 
@@ -216,14 +216,14 @@ function floatValue(field) {
     return Number.parseFloat(field.value);
 }
 
-var Controls = function Controls(changeSettings, start, step) {
+var Controls = function Controls(changeSettings, run, step) {
     this.changeSettings = changeSettings;
 
     Object.keys(inputs).forEach(function (k) {
         inputs[k].addEventListener('change', this.changed.bind(this));
     }, this);
 
-    buttons.start.addEventListener('click', start);
+    buttons.run.addEventListener('click', run);
     buttons.step.addEventListener('click', step);
 };
 

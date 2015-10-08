@@ -10,7 +10,7 @@ var inputs = {
         showVelocity: document.getElementById('showVelocity')
     },
     buttons = {
-        start: document.getElementById('startButton'),
+        run: document.getElementById('runButton'),
         step: document.getElementById('stepButton')
     }
 
@@ -22,14 +22,14 @@ function floatValue(field) {
     return Number.parseFloat(field.value);
 }
 
-var Controls = function (changeSettings, start, step){
+var Controls = function (changeSettings, run, step){
     this.changeSettings = changeSettings;
 
     Object.keys(inputs).forEach(function (k) {
         inputs[k].addEventListener('change', this.changed.bind(this));
     }, this);
 
-    buttons.start.addEventListener('click', start);
+    buttons.run.addEventListener('click', run);
     buttons.step.addEventListener('click', step);
 };
 

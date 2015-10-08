@@ -14,7 +14,7 @@ function sombrero(position) {
 
 function App(canvas) {
     this.controls = new Controls(this._settingsChanged.bind(this),
-                                 this.start.bind(this),
+                                 this.run.bind(this),
                                  this.step.bind(this));
     this.settings = this.controls.currentSettings();
     this.graphics = new Graphics(canvas);
@@ -43,7 +43,7 @@ App.prototype._reset = function() {
     Logger.clear();
 };
 
-App.prototype.start = function() {
+App.prototype.run = function() {
     if (this.finished) { this._reset(); }
     this.running = true;
 };
