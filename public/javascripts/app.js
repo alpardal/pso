@@ -336,12 +336,6 @@ Particle.prototype.move = function (dt) {
     this.posHistory.push(this.pos);
 };
 
-Particle.getPos = function (particle) {
-    return particle.pos;
-};
-
-var maxSpeed = 0.001;
-
 Particle.createParticle = function () {
     var pos = new _vector.Vector({ x: _utils.Utils.randInt(0, _canvas.Canvas.width),
         y: _utils.Utils.randInt(0, _canvas.Canvas.height) });
