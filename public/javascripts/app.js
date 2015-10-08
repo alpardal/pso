@@ -44,21 +44,20 @@ App.prototype.init = function () {
 
 App.prototype._reset = function () {
     this.currentIterations = 0;
-    this.finished = false;
     var particles = _utils.Utils.initArray(this.settings.numOfParticles, _particle.Particle.createParticle);
     this.pso = new _pso.PSO(particles, this.fitnessFunction);
     _logger.Logger.clear();
 };
 
 App.prototype.run = function () {
-    if (this.finished) {
+    if (this._reachedMaxIterations()) {
         this._reset();
     }
     this.running = true;
 };
 
 App.prototype.step = function () {
-    if (this.finished) {
+    if (this._reachedMaxIterations()) {
         this._reset();
     }
     this.running = false;
@@ -73,7 +72,6 @@ App.prototype._loop = function () {
     }
 
     if (this._reachedMaxIterations()) {
-        this.finished = true;
         this.running = false;
     }
 

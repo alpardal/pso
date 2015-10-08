@@ -36,7 +36,6 @@ App.prototype.init = function() {
 
 App.prototype._reset = function() {
     this.currentIterations = 0;
-    this.finished = false;
     var particles = Utils.initArray(this.settings.numOfParticles,
                                     Particle.createParticle);
     this.pso = new PSO(particles, this.fitnessFunction);
@@ -44,12 +43,12 @@ App.prototype._reset = function() {
 };
 
 App.prototype.run = function() {
-    if (this.finished) { this._reset(); }
+    if (this._reachedMaxIterations()) { this._reset(); }
     this.running = true;
 };
 
 App.prototype.step = function() {
-    if (this.finished) { this._reset(); }
+    if (this._reachedMaxIterations()) { this._reset(); }
     this.running = false;
     this._update();
 };
@@ -62,7 +61,6 @@ App.prototype._loop = function() {
     }
 
     if (this._reachedMaxIterations()){
-        this.finished = true;
         this.running = false;
     }
 
