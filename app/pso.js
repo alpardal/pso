@@ -11,7 +11,7 @@ PSO.prototype.update = function(settings) {
         p.move(settings.dt);
         p.pBest = this._fittestPosition([p.pBest, p.pos]);
         p.vel = this._newVelocity(p, this.gBest, settings.c1,
-                                 settings.c2, settings.k);
+                                  settings.c2, settings.k);
     }, this);
     this.gBest = this._calculateGBest();
 };
