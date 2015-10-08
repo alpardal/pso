@@ -391,6 +391,8 @@ exports.PSO = PSO;
 'use strict';
 
 exports.__esModule = true;
+var ffffff = Number.parseInt('ffffff', 16);
+
 var Utils = {
 
     randInt: function randInt(min, max) {
@@ -398,7 +400,7 @@ var Utils = {
     },
 
     randColor: function randColor() {
-        return '#' + Math.floor(Math.random() * 16777215).toString(16);
+        return '#' + Math.floor(Math.random() * ffffff).toString(16);
     },
 
     initArray: function initArray(size, generator) {

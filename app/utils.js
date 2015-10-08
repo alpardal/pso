@@ -1,3 +1,5 @@
+var ffffff = Number.parseInt('ffffff', 16);
+
 var Utils = {
 
     randInt: function(min, max) {
@@ -6,7 +8,7 @@ var Utils = {
 
     randColor: function() {
         return '#' +
-            Math.floor(Math.random()*16777215).toString(16);
+            Math.floor(Math.random()*ffffff).toString(16);
     },
 
     initArray: function(size, generator) {
