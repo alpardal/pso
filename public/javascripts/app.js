@@ -325,10 +325,12 @@ var _canvas = require('./canvas');
 
 var _utils = require('./utils');
 
-var Particle = function Particle(pos, vel) {
+var Particle = function Particle(pos) {
     this.pos = pos;
+    this.vel = _vector.Vector.ORIGIN;
     this.posHistory = [pos];
-    this.vel = vel;
+    this.pBest = this.pos;
+    this.color = _utils.Utils.randColor();
 };
 
 Particle.prototype.move = function (dt) {
@@ -337,13 +339,13 @@ Particle.prototype.move = function (dt) {
 };
 
 Particle.createParticle = function () {
-    var pos = new _vector.Vector({ x: _utils.Utils.randInt(0, _canvas.Canvas.width),
-        y: _utils.Utils.randInt(0, _canvas.Canvas.height) });
-    var p = new Particle(pos, _vector.Vector.ORIGIN);
-    p.pBest = p.pos;
-    p.color = _utils.Utils.randColor();
-    return p;
+    return new Particle(randomPosition());
 };
+
+function randomPosition() {
+    return new _vector.Vector({ x: _utils.Utils.randInt(0, _canvas.Canvas.width),
+        y: _utils.Utils.randInt(0, _canvas.Canvas.height) });
+}
 
 exports.Particle = Particle;
 

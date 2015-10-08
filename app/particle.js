@@ -2,10 +2,12 @@ import {Vector} from './vector';
 import {Canvas} from './canvas';
 import {Utils} from './utils';
 
-var Particle = function(pos, vel) {
+var Particle = function(pos) {
     this.pos = pos;
+    this.vel = Vector.ORIGIN;
     this.posHistory = [pos];
-    this.vel = vel;
+    this.pBest = this.pos;
+    this.color = Utils.randColor();
 };
 
 Particle.prototype.move = function(dt) {
@@ -14,12 +16,12 @@ Particle.prototype.move = function(dt) {
 };
 
 Particle.createParticle = function() {
-    var pos = new Vector({x: Utils.randInt(0, Canvas.width),
-                          y: Utils.randInt(0, Canvas.height)});
-    var p = new Particle(pos, Vector.ORIGIN);
-    p.pBest = p.pos;
-    p.color = Utils.randColor();
-    return p;
+    return new Particle(randomPosition());
+};
+
+function randomPosition() {
+    return new Vector({x: Utils.randInt(0, Canvas.width),
+                       y: Utils.randInt(0, Canvas.height)});
 }
 
 export {Particle};
