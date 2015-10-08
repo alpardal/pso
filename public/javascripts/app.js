@@ -17,6 +17,8 @@ var _viewport = require('./viewport');
 
 var _logger = require('./logger');
 
+var solution_space_width = 12;
+
 function sombrero(position) {
     var x2 = position.x * position.x,
         y2 = position.y * position.y;
@@ -27,7 +29,7 @@ function App(canvas) {
     this.controls = new _controls.Controls(this._settingsChanged.bind(this), this.run.bind(this), this.step.bind(this));
     this.settings = this.controls.currentSettings();
     this.graphics = new _graphics.Graphics(canvas);
-    this.viewport = new _viewport.Viewport(canvas, 12);
+    this.viewport = new _viewport.Viewport(canvas, solution_space_width);
     this.fitnessFunction = (function (position) {
         return sombrero(this.viewport.toLogicCoordinates(position));
     }).bind(this);

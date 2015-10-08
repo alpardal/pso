@@ -6,6 +6,8 @@ import {PSO} from './pso';
 import {Viewport} from './viewport';
 import {Logger} from './logger';
 
+var solution_space_width = 12;
+
 function sombrero(position) {
     var x2 = position.x * position.x,
         y2 = position.y * position.y;
@@ -18,7 +20,7 @@ function App(canvas) {
                                  this.step.bind(this));
     this.settings = this.controls.currentSettings();
     this.graphics = new Graphics(canvas);
-    this.viewport = new Viewport(canvas, 12);
+    this.viewport = new Viewport(canvas, solution_space_width);
     this.fitnessFunction = function(position) {
         return sombrero(this.viewport.toLogicCoordinates(position));
     }.bind(this);
