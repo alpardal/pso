@@ -38,7 +38,7 @@ App.prototype._reset = function() {
     this.currentIterations = 0;
     this.finished = false;
     var particles = Utils.initArray(this.settings.numOfParticles,
-                                     Particle.createParticle);
+                                    Particle.createParticle);
     this.pso = new PSO(particles, this.fitnessFunction);
     Logger.clear();
 };
