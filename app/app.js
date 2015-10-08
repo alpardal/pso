@@ -46,6 +46,7 @@ App.prototype._reset = function() {
 
 App.prototype.run = function() {
     if (this._reachedMaxIterations()) { this._reset(); }
+    if (this.running) { this._reset(); }
     this.running = true;
 };
 
