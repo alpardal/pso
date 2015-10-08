@@ -21,10 +21,8 @@ var maxSpeed = 0.001;
 
 Particle.createParticle = function() {
     var pos = new Vector({x: Utils.randInt(0, Canvas.width),
-                          y: Utils.randInt(0, Canvas.height)}),
-        vel = new Vector({x: Utils.randFloat(-maxSpeed, maxSpeed),
-                          y: Utils.randFloat(-maxSpeed, maxSpeed)});
-    var p = new Particle(pos, vel);
+                          y: Utils.randInt(0, Canvas.height)});
+    var p = new Particle(pos, Vector.ORIGIN);
     p.pBest = p.pos;
     p.color = Utils.randColor();
     return p;

@@ -344,10 +344,8 @@ var maxSpeed = 0.001;
 
 Particle.createParticle = function () {
     var pos = new _vector.Vector({ x: _utils.Utils.randInt(0, _canvas.Canvas.width),
-        y: _utils.Utils.randInt(0, _canvas.Canvas.height) }),
-        vel = new _vector.Vector({ x: _utils.Utils.randFloat(-maxSpeed, maxSpeed),
-        y: _utils.Utils.randFloat(-maxSpeed, maxSpeed) });
-    var p = new Particle(pos, vel);
+        y: _utils.Utils.randInt(0, _canvas.Canvas.height) });
+    var p = new Particle(pos, _vector.Vector.ORIGIN);
     p.pBest = p.pos;
     p.color = _utils.Utils.randColor();
     return p;
@@ -399,12 +397,8 @@ exports.PSO = PSO;
 exports.__esModule = true;
 var Utils = {
 
-    randFloat: function randFloat(min, max) {
-        return min + Math.random() * (max - min);
-    },
-
     randInt: function randInt(min, max) {
-        return Math.round(Utils.randFloat(min, max));
+        return Math.round(min + Math.random() * (max - min));
     },
 
     randColor: function randColor() {
@@ -448,6 +442,8 @@ var Vector = function Vector(coords) {
     this.x = coords.x;
     this.y = coords.y;
 };
+
+Vector.ORIGIN = new Vector({ x: 0, y: 0 });
 
 Vector.prototype.add = function (other) {
     return new Vector({ x: this.x + other.x,

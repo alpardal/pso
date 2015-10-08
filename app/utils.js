@@ -1,11 +1,7 @@
 var Utils = {
 
-    randFloat: function(min, max) {
-        return min + Math.random() * (max - min);
-    },
-
     randInt: function(min, max) {
-        return Math.round(Utils.randFloat(min, max));
+        return Math.round(min + Math.random() * (max - min));
     },
 
     randColor: function() {

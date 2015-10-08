@@ -3,6 +3,8 @@ var Vector = function(coords) {
     this.y = coords.y;
 };
 
+Vector.ORIGIN = new Vector({x: 0, y: 0});
+
 Vector.prototype.add = function(other) {
     return new Vector({x: this.x + other.x,
                        y: this.y + other.y});
