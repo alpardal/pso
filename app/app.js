@@ -83,6 +83,10 @@ App.prototype._render = function() {
         if (this.settings.showVelocity) {
             this.graphics.drawVelocity(p);
         }
+
+        if (this.settings.showPBest) {
+            this.graphics.drawPBest(p);
+        }
     }, this);
 
     if (this.settings.showGBest) {

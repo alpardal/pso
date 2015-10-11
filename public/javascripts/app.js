@@ -85,7 +85,21 @@ App.prototype._update = function () {
 App.prototype._render = function () {
     this.graphics.drawBackground();
 
-    this.pso.particles.forEach(this.graphics.drawParticle.bind(this.graphics, this.settings));
+    this.pso.particles.forEach(function (p) {
+        this.graphics.drawParticle(p);
+
+        if (this.settings.showTrace) {
+            this.graphics.drawTrace(p);
+        }
+
+        if (this.settings.showVelocity) {
+            this.graphics.drawVelocity(p);
+        }
+
+        if (this.settings.showPBest) {
+            this.graphics.drawPBest(p);
+        }
+    }, this);
 
     if (this.settings.showGBest) {
         this.graphics.drawGBest(this.pso.gBest);
@@ -255,6 +269,9 @@ function Graphics(canvas) {
 }
 
 Graphics.particleSize = 2;
+Graphics.gBestCrossColor = 'black';
+Graphics.gBestCrossSize = 20;
+Graphics.pBestCrossSize = 10;
 
 Graphics.prototype.randomParticle = function () {
     return new _particle.Particle(this._randomPosition(), _vector.Vector.ORIGIN, _utils.Utils.randColor());
@@ -278,36 +295,25 @@ Graphics.prototype.drawBackground = function () {
 };
 
 Graphics.prototype.drawGBest = function (gBest) {
-    this.canvas.drawCross(this.toScreenCoordinates(gBest), 20, 'black');
+    this.canvas.drawCross(this.toScreenCoordinates(gBest), Graphics.gBestCrossSize, Graphics.gBestCrossColor);
 };
 
-Graphics.prototype.drawParticle = function (settings, particle) {
+Graphics.prototype.drawParticle = function (particle) {
     this.canvas.fillCircle(this.toScreenCoordinates(particle.pos), Graphics.particleSize, particle.color);
-    if (settings.showTrace) {
-        this._drawTrace(particle);
-    }
-
-    if (settings.showVelocity) {
-        this._drawVelocity(particle);
-    }
-
-    if (settings.showPBest) {
-        this._drawPBest(particle);
-    }
 };
 
-Graphics.prototype._drawTrace = function (particle) {
+Graphics.prototype.drawTrace = function (particle) {
     this.canvas.drawLines(particle.posHistory.map(this.toScreenCoordinates.bind(this)), particle.color);
 };
 
-Graphics.prototype._drawVelocity = function (particle) {
+Graphics.prototype.drawVelocity = function (particle) {
     var from = this.toScreenCoordinates(particle.pos),
         to = this.toScreenCoordinates(particle.pos.add(particle.vel.scale(0.1)));
     this.canvas.drawLine(from, to, 'darkgray');
 };
 
-Graphics.prototype._drawPBest = function (particle) {
-    this.canvas.drawCross(this.toScreenCoordinates(particle.pBest), 10, particle.color);
+Graphics.prototype.drawPBest = function (particle) {
+    this.canvas.drawCross(this.toScreenCoordinates(particle.pBest), Graphics.pBestCrossSize, particle.color);
 };
 
 Graphics.prototype._drawGrid = function () {

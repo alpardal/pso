@@ -6,6 +6,7 @@ var inputs = {
         dt: document.getElementById('dt'),
         maxIterations: document.getElementById('maxIterations'),
         showGBest: document.getElementById('showGBest'),
+        showPBest: document.getElementById('showPBest'),
         showTrace: document.getElementById('showTrace'),
         showVelocity: document.getElementById('showVelocity')
     },
@@ -46,6 +47,7 @@ Controls.prototype.currentSettings = function() {
         dt: floatValue(inputs.dt),
         maxIterations: intValue(inputs.maxIterations),
         showGBest: inputs.showGBest.checked,
+        showPBest: inputs.showPBest.checked,
         showTrace: inputs.showTrace.checked,
         showVelocity: inputs.showVelocity.checked
     };
