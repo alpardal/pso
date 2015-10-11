@@ -16,7 +16,7 @@ var _logger = require('./logger');
 function sombrero(position) {
     var x2 = position.x * position.x,
         y2 = position.y * position.y;
-    return Math.sin(Math.sqrt(x2 + y2)) / Math.sqrt(x2 + y2);
+    return 6 * Math.cos(Math.sqrt(x2 + y2)) / (x2 + y2 + 6);
 }
 
 function App(canvas) {
@@ -85,17 +85,7 @@ App.prototype._update = function () {
 App.prototype._render = function () {
     this.graphics.drawBackground();
 
-    this.pso.particles.forEach(function (p) {
-        this.graphics.drawParticle(p);
-
-        if (this.settings.showTrace) {
-            this.graphics.drawTrace(p);
-        }
-
-        if (this.settings.showVelocity) {
-            this.graphics.drawVelocity(p);
-        }
-    }, this);
+    this.pso.particles.forEach(this.graphics.drawParticle.bind(this.graphics, this.settings));
 
     if (this.settings.showGBest) {
         this.graphics.drawGBest(this.pso.gBest);
@@ -194,6 +184,7 @@ var inputs = {
     dt: document.getElementById('dt'),
     maxIterations: document.getElementById('maxIterations'),
     showGBest: document.getElementById('showGBest'),
+    showPBest: document.getElementById('showPBest'),
     showTrace: document.getElementById('showTrace'),
     showVelocity: document.getElementById('showVelocity')
 },
@@ -234,6 +225,7 @@ Controls.prototype.currentSettings = function () {
         dt: floatValue(inputs.dt),
         maxIterations: intValue(inputs.maxIterations),
         showGBest: inputs.showGBest.checked,
+        showPBest: inputs.showPBest.checked,
         showTrace: inputs.showTrace.checked,
         showVelocity: inputs.showVelocity.checked
     };
@@ -254,7 +246,7 @@ var _particle = require('./particle');
 
 function Graphics(canvas) {
     this.canvas = canvas;
-    this.minX = -6;
+    this.minX = -12;
     this.maxX = -this.minX;
     this.minY = this.minX * canvas.height / canvas.width;
     this.maxY = -this.minY;
@@ -289,18 +281,33 @@ Graphics.prototype.drawGBest = function (gBest) {
     this.canvas.drawCross(this.toScreenCoordinates(gBest), 20, 'black');
 };
 
-Graphics.prototype.drawParticle = function (particle) {
+Graphics.prototype.drawParticle = function (settings, particle) {
     this.canvas.fillCircle(this.toScreenCoordinates(particle.pos), Graphics.particleSize, particle.color);
+    if (settings.showTrace) {
+        this._drawTrace(particle);
+    }
+
+    if (settings.showVelocity) {
+        this._drawVelocity(particle);
+    }
+
+    if (settings.showPBest) {
+        this._drawPBest(particle);
+    }
 };
 
-Graphics.prototype.drawTrace = function (particle) {
+Graphics.prototype._drawTrace = function (particle) {
     this.canvas.drawLines(particle.posHistory.map(this.toScreenCoordinates.bind(this)), particle.color);
 };
 
-Graphics.prototype.drawVelocity = function (particle) {
+Graphics.prototype._drawVelocity = function (particle) {
     var from = this.toScreenCoordinates(particle.pos),
         to = this.toScreenCoordinates(particle.pos.add(particle.vel.scale(0.1)));
     this.canvas.drawLine(from, to, 'darkgray');
+};
+
+Graphics.prototype._drawPBest = function (particle) {
+    this.canvas.drawCross(this.toScreenCoordinates(particle.pBest), 10, particle.color);
 };
 
 Graphics.prototype._drawGrid = function () {

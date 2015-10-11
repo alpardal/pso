@@ -4,7 +4,7 @@ import {Particle} from './particle';
 
 function Graphics(canvas) {
     this.canvas = canvas;
-    this.minX = -6;
+    this.minX = -12;
     this.maxX = -this.minX;
     this.minY = this.minX * canvas.height/canvas.width;
     this.maxY = -this.minY;
