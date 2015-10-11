@@ -7,19 +7,11 @@ var _controls = require('./controls');
 
 var _graphics = require('./graphics');
 
-var _particle = require('./particle');
-
 var _utils = require('./utils');
-
-var _vector = require('./vector');
 
 var _pso = require('./pso');
 
-var _viewport = require('./viewport');
-
 var _logger = require('./logger');
-
-var solution_space_width = 12;
 
 function sombrero(position) {
     var x2 = position.x * position.x,
@@ -28,18 +20,12 @@ function sombrero(position) {
 }
 
 function App(canvas) {
-    this.canvas = canvas;
     this.controls = new _controls.Controls(this._settingsChanged.bind(this), this.run.bind(this), this.step.bind(this));
     this.settings = this.controls.currentSettings();
     this.graphics = new _graphics.Graphics(canvas);
-    this.viewport = new _viewport.Viewport(canvas, solution_space_width);
-    this.fitnessFunction = (function (position) {
-        return sombrero(this.viewport.toLogicCoordinates(position));
-    }).bind(this);
-    canvas.addHoverTrackingFunction((function (pos) {
-        console.log(this.fitnessFunction(pos).toFixed(5) + ' @ ' + this.viewport.toLogicCoordinates(pos));
-    }).bind(this));
+    this.fitnessFunction = sombrero;
     this.running = false;
+    canvas.addHoverTrackingFunction(this._logScreenPosition.bind(this));
 }
 
 App.prototype.init = function () {
@@ -49,12 +35,7 @@ App.prototype.init = function () {
 
 App.prototype._reset = function () {
     this.currentIterations = 0;
-    var createParticle = (function () {
-        var pos = new _vector.Vector({ x: _utils.Utils.randInt(0, this.canvas.width),
-            y: _utils.Utils.randInt(0, this.canvas.height) });
-        return new _particle.Particle(pos, _vector.Vector.ORIGIN, _utils.Utils.randColor());
-    }).bind(this);
-    var particles = _utils.Utils.initArray(this.settings.numOfParticles, createParticle);
+    var particles = _utils.Utils.initArray(this.settings.numOfParticles, this.graphics.randomParticle.bind(this.graphics));
     this.pso = new _pso.PSO(particles, this.fitnessFunction);
     _logger.Logger.clear();
 };
@@ -123,7 +104,12 @@ App.prototype._render = function () {
 
 App.prototype._logGBest = function () {
     var value = this.fitnessFunction(this.pso.gBest);
-    _logger.Logger.setText('Valor máximo atual: ' + value.toFixed(5) + ' em ' + this.viewport.toLogicCoordinates(this.pso.gBest).toString());
+    _logger.Logger.setText('Valor máximo atual: ' + value.toFixed(5) + ' em ' + this.pso.gBest.toString());
+};
+
+App.prototype._logScreenPosition = function (screenPos) {
+    var pos = this.graphics.fromScreenCoordinates(screenPos);
+    console.log(this.fitnessFunction(pos).toFixed(5) + ' @ ' + pos.toString());
 };
 
 App.prototype._settingsChanged = function (settings) {
@@ -132,7 +118,7 @@ App.prototype._settingsChanged = function (settings) {
 
 exports.App = App;
 
-},{"./controls":3,"./graphics":4,"./logger":5,"./particle":7,"./pso":8,"./utils":9,"./vector":10,"./viewport":11}],2:[function(require,module,exports){
+},{"./controls":3,"./graphics":4,"./logger":5,"./pso":8,"./utils":9}],2:[function(require,module,exports){
 'use strict';
 
 exports.__esModule = true;
@@ -150,9 +136,9 @@ Canvas.prototype.clearBackground = function () {
     this.ctx.clearRect(0, 0, this.width, this.height);
 };
 
-Canvas.prototype.fillCircle = function (x, y, radius, color) {
+Canvas.prototype.fillCircle = function (pos, radius, color) {
     this.ctx.beginPath();
-    this.ctx.arc(x, y, radius, 0, 2 * Math.PI);
+    this.ctx.arc(pos.x, pos.y, radius, 0, 2 * Math.PI);
     this.ctx.closePath();
     this.ctx.fillStyle = color;
     this.ctx.fill();
@@ -177,12 +163,12 @@ Canvas.prototype.drawLines = function (points, color) {
     this.ctx.stroke();
 };
 
-Canvas.prototype.drawCross = function (x, y, size, color) {
+Canvas.prototype.drawCross = function (pos, size, color) {
     this.ctx.beginPath();
-    this.ctx.moveTo(x - size / 2, y);
-    this.ctx.lineTo(x + size / 2, y);
-    this.ctx.moveTo(x, y - size / 2);
-    this.ctx.lineTo(x, y + size / 2);
+    this.ctx.moveTo(pos.x - size / 2, pos.y);
+    this.ctx.lineTo(pos.x + size / 2, pos.y);
+    this.ctx.moveTo(pos.x, pos.y - size / 2);
+    this.ctx.lineTo(pos.x, pos.y + size / 2);
     this.ctx.closePath();
     this.ctx.strokeStyle = color;
     this.ctx.stroke();
@@ -259,11 +245,40 @@ exports.Controls = Controls;
 'use strict';
 
 exports.__esModule = true;
+
+var _vector = require('./vector');
+
+var _utils = require('./utils');
+
+var _particle = require('./particle');
+
 function Graphics(canvas) {
     this.canvas = canvas;
+    this.minX = -6;
+    this.maxX = -this.minX;
+    this.minY = this.minX * canvas.height / canvas.width;
+    this.maxY = -this.minY;
+    this.xSpan = this.maxX - this.minX;
+    this.ySpan = this.maxY - this.minY;
 }
 
 Graphics.particleSize = 2;
+
+Graphics.prototype.randomParticle = function () {
+    return new _particle.Particle(this._randomPosition(), _vector.Vector.ORIGIN, _utils.Utils.randColor());
+};
+
+Graphics.prototype.toScreenCoordinates = function (pos) {
+    var x = _utils.Utils.interpolate(pos.x, this.minX, this.maxX, 0, this.canvas.width),
+        y = _utils.Utils.interpolate(pos.y, this.minY, this.maxY, 0, this.canvas.height);
+    return new _vector.Vector({ x: x, y: y });
+};
+
+Graphics.prototype.fromScreenCoordinates = function (screenPos) {
+    var x = _utils.Utils.interpolate(screenPos.x, 0, this.canvas.width, this.minX, this.maxX),
+        y = _utils.Utils.interpolate(screenPos.y, 0, this.canvas.height, this.minY, this.maxY);
+    return new _vector.Vector({ x: x, y: y });
+};
 
 Graphics.prototype.drawBackground = function () {
     this.canvas.clearBackground();
@@ -271,19 +286,21 @@ Graphics.prototype.drawBackground = function () {
 };
 
 Graphics.prototype.drawGBest = function (gBest) {
-    this.canvas.drawCross(gBest.x, gBest.y, 20, 'black');
+    this.canvas.drawCross(this.toScreenCoordinates(gBest), 20, 'black');
 };
 
 Graphics.prototype.drawParticle = function (particle) {
-    this.canvas.fillCircle(particle.pos.x, particle.pos.y, Graphics.particleSize, particle.color);
+    this.canvas.fillCircle(this.toScreenCoordinates(particle.pos), Graphics.particleSize, particle.color);
 };
 
 Graphics.prototype.drawTrace = function (particle) {
-    this.canvas.drawLines(particle.posHistory, particle.color);
+    this.canvas.drawLines(particle.posHistory.map(this.toScreenCoordinates.bind(this)), particle.color);
 };
 
 Graphics.prototype.drawVelocity = function (particle) {
-    this.canvas.drawLine(particle.pos, particle.pos.add(particle.vel.scale(0.1)), 'darkgray');
+    var from = this.toScreenCoordinates(particle.pos),
+        to = this.toScreenCoordinates(particle.pos.add(particle.vel.scale(0.1)));
+    this.canvas.drawLine(from, to, 'darkgray');
 };
 
 Graphics.prototype._drawGrid = function () {
@@ -291,9 +308,14 @@ Graphics.prototype._drawGrid = function () {
     this.canvas.drawLine({ x: 0, y: this.canvas.height / 2 }, { x: this.canvas.width, y: this.canvas.height / 2 }, 'white');
 };
 
+Graphics.prototype._randomPosition = function () {
+    return new _vector.Vector({ x: _utils.Utils.rand(this.minX, this.maxX),
+        y: _utils.Utils.rand(this.minY, this.maxY) });
+};
+
 exports.Graphics = Graphics;
 
-},{}],5:[function(require,module,exports){
+},{"./particle":7,"./utils":9,"./vector":10}],5:[function(require,module,exports){
 'use strict';
 
 exports.__esModule = true;
@@ -388,8 +410,8 @@ var ffffff = Number.parseInt('ffffff', 16);
 
 var Utils = {
 
-    randInt: function randInt(min, max) {
-        return Math.round(min + Math.random() * (max - min));
+    rand: function rand(min, max) {
+        return min + Math.random() * (max - min);
     },
 
     randColor: function randColor() {
@@ -412,8 +434,9 @@ var Utils = {
         }).item;
     },
 
-    interpolate: function interpolate(value, max, newMin, newMax) {
-        return newMin + (newMax - newMin) * value / max;
+    interpolate: function interpolate(value, oldMin, oldMax, newMin, newMax) {
+        var ratio = (value - oldMin) / (oldMax - oldMin);
+        return newMin + ratio * (newMax - newMin);
     },
 
     accessor: function accessor(propName) {
@@ -461,29 +484,4 @@ Vector.prototype.toString = function () {
 
 exports.Vector = Vector;
 
-},{}],11:[function(require,module,exports){
-'use strict';
-
-exports.__esModule = true;
-
-var _utils = require('./utils');
-
-var _vector = require('./vector');
-
-function Viewport(canvas, logicWidth) {
-    this.screenWidth = canvas.width;
-    this.screenHeight = canvas.height;
-    this.logicWidth = logicWidth;
-    this.logicHeight = logicWidth * this.screenHeight / this.screenWidth;
-}
-
-Viewport.prototype.toLogicCoordinates = function (screenPosition) {
-    var logicX = _utils.Utils.interpolate(screenPosition.x, this.screenWidth, -this.logicWidth / 2, this.logicWidth / 2),
-        logicY = _utils.Utils.interpolate(screenPosition.y, this.screenHeight, this.logicHeight / 2, -this.logicHeight / 2);
-
-    return new _vector.Vector({ x: logicX, y: logicY });
-};
-
-exports.Viewport = Viewport;
-
-},{"./utils":9,"./vector":10}]},{},[1,2,3,4,5,6,7,8,9,10,11]);
+},{}]},{},[1,2,3,4,5,6,7,8,9,10]);

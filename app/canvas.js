@@ -12,9 +12,9 @@ Canvas.prototype.clearBackground = function() {
     this.ctx.clearRect(0, 0, this.width, this.height);
 };
 
-Canvas.prototype.fillCircle = function(x, y, radius, color) {
+Canvas.prototype.fillCircle = function(pos, radius, color) {
     this.ctx.beginPath();
-    this.ctx.arc(x, y, radius, 0, 2*Math.PI);
+    this.ctx.arc(pos.x, pos.y, radius, 0, 2*Math.PI);
     this.ctx.closePath();
     this.ctx.fillStyle = color;
     this.ctx.fill();
@@ -39,12 +39,12 @@ Canvas.prototype.drawLines = function(points, color) {
     this.ctx.stroke();
 };
 
-Canvas.prototype.drawCross = function(x, y, size, color) {
+Canvas.prototype.drawCross = function(pos, size, color) {
     this.ctx.beginPath();
-    this.ctx.moveTo(x-size/2, y);
-    this.ctx.lineTo(x+size/2, y);
-    this.ctx.moveTo(x, y-size/2);
-    this.ctx.lineTo(x, y+size/2);
+    this.ctx.moveTo(pos.x-size/2, pos.y);
+    this.ctx.lineTo(pos.x+size/2, pos.y);
+    this.ctx.moveTo(pos.x, pos.y-size/2);
+    this.ctx.lineTo(pos.x, pos.y+size/2);
     this.ctx.closePath();
     this.ctx.strokeStyle = color;
     this.ctx.stroke();

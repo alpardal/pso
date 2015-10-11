@@ -2,8 +2,8 @@ var ffffff = Number.parseInt('ffffff', 16);
 
 var Utils = {
 
-    randInt: function(min, max) {
-        return Math.round(min + Math.random() * (max - min));
+    rand: function(min, max) {
+        return min + Math.random() * (max - min);
     },
 
     randColor: function() {
@@ -27,8 +27,9 @@ var Utils = {
         }).item;
     },
 
-    interpolate: function(value, max, newMin, newMax) {
-        return newMin + (newMax - newMin) * value/max;
+    interpolate: function(value, oldMin, oldMax, newMin, newMax) {
+        var ratio = (value - oldMin) / (oldMax - oldMin);
+        return newMin + ratio * (newMax - newMin);
     },
 
     accessor: function(propName) {

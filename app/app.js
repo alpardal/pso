@@ -1,13 +1,8 @@
 import {Controls} from './controls';
 import {Graphics} from './graphics';
-import {Particle} from './particle';
 import {Utils} from './utils';
-import {Vector} from './vector';
 import {PSO} from './pso';
-import {Viewport} from './viewport';
 import {Logger} from './logger';
-
-var solution_space_width = 12;
 
 function sombrero(position) {
     var x2 = position.x * position.x,
@@ -16,21 +11,14 @@ function sombrero(position) {
 }
 
 function App(canvas) {
-    this.canvas = canvas;
     this.controls = new Controls(this._settingsChanged.bind(this),
                                  this.run.bind(this),
                                  this.step.bind(this));
     this.settings = this.controls.currentSettings();
     this.graphics = new Graphics(canvas);
-    this.viewport = new Viewport(canvas, solution_space_width);
-    this.fitnessFunction = function(position) {
-        return sombrero(this.viewport.toLogicCoordinates(position));
-    }.bind(this);
-    canvas.addHoverTrackingFunction(function(pos) {
-        console.log(this.fitnessFunction(pos).toFixed(5) + ' @ ' +
-                    this.viewport.toLogicCoordinates(pos));
-    }.bind(this));
+    this.fitnessFunction = sombrero;
     this.running = false;
+    canvas.addHoverTrackingFunction(this._logScreenPosition.bind(this));
 }
 
 App.prototype.init = function() {
@@ -40,13 +28,8 @@ App.prototype.init = function() {
 
 App.prototype._reset = function() {
     this.currentIterations = 0;
-    var createParticle = function() {
-        var pos = new Vector({x: Utils.randInt(0, this.canvas.width),
-                              y: Utils.randInt(0, this.canvas.height)});
-        return new Particle(pos, Vector.ORIGIN, Utils.randColor());
-    }.bind(this);
     var particles = Utils.initArray(this.settings.numOfParticles,
-                                    createParticle);
+                                    this.graphics.randomParticle.bind(this.graphics));
     this.pso = new PSO(particles, this.fitnessFunction);
     Logger.clear();
 };
@@ -110,7 +93,13 @@ App.prototype._render = function() {
 App.prototype._logGBest = function() {
     var value = this.fitnessFunction(this.pso.gBest);
     Logger.setText('Valor máximo atual: ' + value.toFixed(5) +
-      ' em ' + this.viewport.toLogicCoordinates(this.pso.gBest).toString());
+      ' em ' + this.pso.gBest.toString());
+};
+
+App.prototype._logScreenPosition = function(screenPos) {
+    var pos = this.graphics.fromScreenCoordinates(screenPos);
+    console.log(this.fitnessFunction(pos).toFixed(5) + ' @ ' +
+                pos.toString());
 };
 
 App.prototype._settingsChanged = function(settings) {
