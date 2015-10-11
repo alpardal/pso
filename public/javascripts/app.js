@@ -11,6 +11,8 @@ var _particle = require('./particle');
 
 var _utils = require('./utils');
 
+var _vector = require('./vector');
+
 var _pso = require('./pso');
 
 var _viewport = require('./viewport');
@@ -26,6 +28,7 @@ function sombrero(position) {
 }
 
 function App(canvas) {
+    this.canvas = canvas;
     this.controls = new _controls.Controls(this._settingsChanged.bind(this), this.run.bind(this), this.step.bind(this));
     this.settings = this.controls.currentSettings();
     this.graphics = new _graphics.Graphics(canvas);
@@ -46,7 +49,12 @@ App.prototype.init = function () {
 
 App.prototype._reset = function () {
     this.currentIterations = 0;
-    var particles = _utils.Utils.initArray(this.settings.numOfParticles, _particle.Particle.createParticle);
+    var createParticle = (function () {
+        var pos = new _vector.Vector({ x: _utils.Utils.randInt(0, this.canvas.width),
+            y: _utils.Utils.randInt(0, this.canvas.height) });
+        return new _particle.Particle(pos, _vector.Vector.ORIGIN, _utils.Utils.randColor());
+    }).bind(this);
+    var particles = _utils.Utils.initArray(this.settings.numOfParticles, createParticle);
     this.pso = new _pso.PSO(particles, this.fitnessFunction);
     _logger.Logger.clear();
 };
@@ -124,69 +132,66 @@ App.prototype._settingsChanged = function (settings) {
 
 exports.App = App;
 
-},{"./controls":3,"./graphics":4,"./logger":5,"./particle":7,"./pso":8,"./utils":9,"./viewport":11}],2:[function(require,module,exports){
+},{"./controls":3,"./graphics":4,"./logger":5,"./particle":7,"./pso":8,"./utils":9,"./vector":10,"./viewport":11}],2:[function(require,module,exports){
 'use strict';
 
 exports.__esModule = true;
 
 var _vector = require('./vector');
 
-var canvas = document.getElementById('drawing-canvas'),
-    ctx = canvas.getContext('2d');
+var Canvas = function Canvas(dom_canvas) {
+    this.dom_canvas = dom_canvas;
+    this.ctx = dom_canvas.getContext('2d');
+    this.width = dom_canvas.width;
+    this.height = dom_canvas.height;
+};
 
-var Canvas = {
+Canvas.prototype.clearBackground = function () {
+    this.ctx.clearRect(0, 0, this.width, this.height);
+};
 
-    width: canvas.width,
+Canvas.prototype.fillCircle = function (x, y, radius, color) {
+    this.ctx.beginPath();
+    this.ctx.arc(x, y, radius, 0, 2 * Math.PI);
+    this.ctx.closePath();
+    this.ctx.fillStyle = color;
+    this.ctx.fill();
+};
 
-    height: canvas.height,
+Canvas.prototype.drawLine = function (p1, p2, color) {
+    this.drawLines([p1, p2], color);
+};
 
-    clearBackground: function clearBackground() {
-        ctx.clearRect(0, 0, this.width, this.height);
-    },
+Canvas.prototype.drawLines = function (points, color) {
+    this.ctx.beginPath();
+    this.ctx.closePath();
 
-    fillCircle: function fillCircle(x, y, radius, color) {
-        ctx.beginPath();
-        ctx.arc(x, y, radius, 0, 2 * Math.PI);
-        ctx.closePath();
-        ctx.fillStyle = color;
-        ctx.fill();
-    },
-
-    drawLine: function drawLine(p1, p2, color) {
-        this.drawLines([p1, p2], color);
-    },
-
-    drawLines: function drawLines(points, color) {
-        ctx.beginPath();
-        ctx.closePath();
-
-        for (var i = 0; i < points.length - 1; i++) {
-            var p1 = points[i],
-                p2 = points[i + 1];
-            ctx.moveTo(p1.x, p1.y);
-            ctx.lineTo(p2.x, p2.y);
-        }
-
-        ctx.strokeStyle = color;
-        ctx.stroke();
-    },
-
-    drawCross: function drawCross(x, y, size, color) {
-        ctx.beginPath();
-        ctx.moveTo(x - size / 2, y);
-        ctx.lineTo(x + size / 2, y);
-        ctx.moveTo(x, y - size / 2);
-        ctx.lineTo(x, y + size / 2);
-        ctx.closePath();
-        ctx.strokeStyle = color;
-        ctx.stroke();
-    },
-
-    addHoverTrackingFunction: function addHoverTrackingFunction(fun) {
-        canvas.addEventListener('mousemove', function (event) {
-            fun(new _vector.Vector({ x: event.offsetX, y: event.offsetY }));
-        });
+    for (var i = 0; i < points.length - 1; i++) {
+        var p1 = points[i],
+            p2 = points[i + 1];
+        this.ctx.moveTo(p1.x, p1.y);
+        this.ctx.lineTo(p2.x, p2.y);
     }
+
+    this.ctx.strokeStyle = color;
+    this.ctx.stroke();
+};
+
+Canvas.prototype.drawCross = function (x, y, size, color) {
+    this.ctx.beginPath();
+    this.ctx.moveTo(x - size / 2, y);
+    this.ctx.lineTo(x + size / 2, y);
+    this.ctx.moveTo(x, y - size / 2);
+    this.ctx.lineTo(x, y + size / 2);
+    this.ctx.closePath();
+    this.ctx.strokeStyle = color;
+    this.ctx.stroke();
+};
+
+Canvas.prototype.addHoverTrackingFunction = function (fun) {
+    this.dom_canvas.addEventListener('mousemove', function (event) {
+        fun(new _vector.Vector({ x: event.offsetX, y: event.offsetY }));
+    });
 };
 
 exports.Canvas = Canvas;
@@ -314,26 +319,20 @@ var _canvas = require('./canvas');
 
 var _app = require('./app');
 
-var app = new _app.App(_canvas.Canvas);
+var app = new _app.App(new _canvas.Canvas(document.getElementById('drawing-canvas')));
 app.init();
 
 },{"./app":1,"./canvas":2}],7:[function(require,module,exports){
-'use strict';
+"use strict";
 
 exports.__esModule = true;
 
-var _vector = require('./vector');
-
-var _canvas = require('./canvas');
-
-var _utils = require('./utils');
-
-var Particle = function Particle(pos) {
+var Particle = function Particle(pos, vel, color) {
     this.pos = pos;
-    this.vel = _vector.Vector.ORIGIN;
+    this.vel = vel;
     this.posHistory = [pos];
     this.pBest = this.pos;
-    this.color = _utils.Utils.randColor();
+    this.color = color;
 };
 
 Particle.prototype.move = function (dt) {
@@ -341,18 +340,9 @@ Particle.prototype.move = function (dt) {
     this.posHistory.push(this.pos);
 };
 
-Particle.createParticle = function () {
-    return new Particle(randomPosition());
-};
-
-function randomPosition() {
-    return new _vector.Vector({ x: _utils.Utils.randInt(0, _canvas.Canvas.width),
-        y: _utils.Utils.randInt(0, _canvas.Canvas.height) });
-}
-
 exports.Particle = Particle;
 
-},{"./canvas":2,"./utils":9,"./vector":10}],8:[function(require,module,exports){
+},{}],8:[function(require,module,exports){
 'use strict';
 
 exports.__esModule = true;

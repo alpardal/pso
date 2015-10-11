@@ -2,6 +2,7 @@ import {Controls} from './controls';
 import {Graphics} from './graphics';
 import {Particle} from './particle';
 import {Utils} from './utils';
+import {Vector} from './vector';
 import {PSO} from './pso';
 import {Viewport} from './viewport';
 import {Logger} from './logger';
@@ -15,6 +16,7 @@ function sombrero(position) {
 }
 
 function App(canvas) {
+    this.canvas = canvas;
     this.controls = new Controls(this._settingsChanged.bind(this),
                                  this.run.bind(this),
                                  this.step.bind(this));
@@ -38,8 +40,13 @@ App.prototype.init = function() {
 
 App.prototype._reset = function() {
     this.currentIterations = 0;
+    var createParticle = function() {
+        var pos = new Vector({x: Utils.randInt(0, this.canvas.width),
+                              y: Utils.randInt(0, this.canvas.height)});
+        return new Particle(pos, Vector.ORIGIN, Utils.randColor());
+    }.bind(this);
     var particles = Utils.initArray(this.settings.numOfParticles,
-                                    Particle.createParticle);
+                                    createParticle);
     this.pso = new PSO(particles, this.fitnessFunction);
     Logger.clear();
 };

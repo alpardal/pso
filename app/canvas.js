@@ -1,61 +1,59 @@
 import {Vector} from './vector';
 
-var canvas = document.getElementById('drawing-canvas'),
-    ctx = canvas.getContext('2d');
 
-var Canvas = {
+var Canvas = function(dom_canvas){
+    this.dom_canvas = dom_canvas;
+    this.ctx = dom_canvas.getContext('2d');
+    this.width = dom_canvas.width;
+    this.height = dom_canvas.height;
+};
 
-    width: canvas.width,
+Canvas.prototype.clearBackground = function() {
+    this.ctx.clearRect(0, 0, this.width, this.height);
+};
 
-    height: canvas.height,
+Canvas.prototype.fillCircle = function(x, y, radius, color) {
+    this.ctx.beginPath();
+    this.ctx.arc(x, y, radius, 0, 2*Math.PI);
+    this.ctx.closePath();
+    this.ctx.fillStyle = color;
+    this.ctx.fill();
+};
 
-    clearBackground: function() {
-        ctx.clearRect(0, 0, this.width, this.height);
-    },
+Canvas.prototype.drawLine = function(p1, p2, color) {
+    this.drawLines([p1, p2], color);
+};
 
-    fillCircle: function(x, y, radius, color) {
-        ctx.beginPath();
-        ctx.arc(x, y, radius, 0, 2*Math.PI);
-        ctx.closePath();
-        ctx.fillStyle = color;
-        ctx.fill();
-    },
+Canvas.prototype.drawLines = function(points, color) {
+    this.ctx.beginPath();
+    this.ctx.closePath();
 
-    drawLine: function(p1, p2, color) {
-        this.drawLines([p1, p2], color);
-    },
-
-    drawLines: function(points, color) {
-        ctx.beginPath();
-        ctx.closePath();
-
-        for (var i = 0; i < points.length-1; i++) {
-            var p1 = points[i],
-                p2 = points[i+1];
-            ctx.moveTo(p1.x, p1.y);
-            ctx.lineTo(p2.x, p2.y);
-        }
-
-        ctx.strokeStyle = color;
-        ctx.stroke();
-    },
-
-    drawCross: function(x, y, size, color) {
-        ctx.beginPath();
-        ctx.moveTo(x-size/2, y);
-        ctx.lineTo(x+size/2, y);
-        ctx.moveTo(x, y-size/2);
-        ctx.lineTo(x, y+size/2);
-        ctx.closePath();
-        ctx.strokeStyle = color;
-        ctx.stroke();
-    },
-
-    addHoverTrackingFunction: function(fun) {
-        canvas.addEventListener('mousemove', function(event) {
-            fun(new Vector({x: event.offsetX, y: event.offsetY}));
-        });
+    for (var i = 0; i < points.length-1; i++) {
+        var p1 = points[i],
+            p2 = points[i+1];
+        this.ctx.moveTo(p1.x, p1.y);
+        this.ctx.lineTo(p2.x, p2.y);
     }
+
+    this.ctx.strokeStyle = color;
+    this.ctx.stroke();
+};
+
+Canvas.prototype.drawCross = function(x, y, size, color) {
+    this.ctx.beginPath();
+    this.ctx.moveTo(x-size/2, y);
+    this.ctx.lineTo(x+size/2, y);
+    this.ctx.moveTo(x, y-size/2);
+    this.ctx.lineTo(x, y+size/2);
+    this.ctx.closePath();
+    this.ctx.strokeStyle = color;
+    this.ctx.stroke();
+};
+
+Canvas.prototype.addHoverTrackingFunction = function(fun) {
+    this.dom_canvas.addEventListener('mousemove', function(event) {
+        fun(new Vector({x: event.offsetX, y: event.offsetY}));
+    });
 };
 
 export {Canvas};
