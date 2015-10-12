@@ -23,34 +23,42 @@ function floatValue(field) {
     return Number.parseFloat(field.value);
 }
 
-var Controls = function (changeSettings, run, step){
-    this.changeSettings = changeSettings;
+var proto = {
+    changed() {
+        this.changeSettings(this.currentSettings());
+    },
 
-    Object.keys(inputs).forEach(function (k) {
-        inputs[k].addEventListener('change', this.changed.bind(this));
-    }, this);
-
-    buttons.run.addEventListener('click', run);
-    buttons.step.addEventListener('click', step);
+    currentSettings() {
+        return {
+            numOfParticles: intValue(inputs.numberOfParticles),
+            c1: floatValue(inputs.c1),
+            c2: floatValue(inputs.c2),
+            k: floatValue(inputs.k),
+            dt: floatValue(inputs.dt),
+            maxIterations: intValue(inputs.maxIterations),
+            showGBest: inputs.showGBest.checked,
+            showPBest: inputs.showPBest.checked,
+            showTrace: inputs.showTrace.checked,
+            showVelocity: inputs.showVelocity.checked
+        };
+    }
 };
 
-Controls.prototype.changed = function() {
-    this.changeSettings(this.currentSettings());
+var Controls = {
+    create(changeSettings, run, step) {
+        var c = Object.create(proto);
+        c.changeSettings = changeSettings;
+
+        Object.keys(inputs).forEach(k => {
+            inputs[k].addEventListener('change', c.changed.bind(c));
+        });
+
+        buttons.run.addEventListener('click', run);
+        buttons.step.addEventListener('click', step);
+
+        return c;
+    }
 };
 
-Controls.prototype.currentSettings = function() {
-    return {
-        numOfParticles: intValue(inputs.numberOfParticles),
-        c1: floatValue(inputs.c1),
-        c2: floatValue(inputs.c2),
-        k: floatValue(inputs.k),
-        dt: floatValue(inputs.dt),
-        maxIterations: intValue(inputs.maxIterations),
-        showGBest: inputs.showGBest.checked,
-        showPBest: inputs.showPBest.checked,
-        showTrace: inputs.showTrace.checked,
-        showVelocity: inputs.showVelocity.checked
-    };
-};
 
 export {Controls};

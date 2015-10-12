@@ -19,105 +19,115 @@ function sombrero(position) {
     return 6 * Math.cos(Math.sqrt(x2 + y2)) / (x2 + y2 + 6);
 }
 
-function App(canvas) {
-    this.controls = new _controls.Controls(this._settingsChanged.bind(this), this.run.bind(this), this.step.bind(this));
-    this.settings = this.controls.currentSettings();
-    this.graphics = new _graphics.Graphics(canvas);
-    this.fitnessFunction = sombrero;
-    this.running = false;
-    canvas.addHoverTrackingFunction(this._logScreenPosition.bind(this));
-}
+var proto = {
 
-App.prototype.init = function () {
-    this._reset();
-    this._loop();
-};
-
-App.prototype._reset = function () {
-    this.currentIterations = 0;
-    var particles = _utils.Utils.initArray(this.settings.numOfParticles, this.graphics.randomParticle.bind(this.graphics));
-    this.pso = new _pso.PSO(particles, this.fitnessFunction);
-    _logger.Logger.clear();
-};
-
-App.prototype.run = function () {
-    if (this._reachedMaxIterations()) {
+    init: function init() {
         this._reset();
-    }
-    if (this.running) {
-        this._reset();
-    }
-    this.running = true;
-};
+        this._loop();
+    },
 
-App.prototype.step = function () {
-    if (this._reachedMaxIterations()) {
-        this._reset();
-    }
-    this.running = false;
-    this._update();
-};
+    _reset: function _reset() {
+        this.currentIterations = 0;
+        var particles = _utils.Utils.initArray(this.settings.numOfParticles, this.graphics.randomParticle.bind(this.graphics));
+        this.pso = _pso.PSO.create(particles, this.fitnessFunction);
+        _logger.Logger.clear();
+    },
 
-App.prototype._loop = function () {
-    this._render();
+    run: function run() {
+        if (this._reachedMaxIterations()) {
+            this._reset();
+        }
+        if (this.running) {
+            this._reset();
+        }
+        this.running = true;
+    },
 
-    if (this.running) {
-        this._update();
-    }
-
-    if (this._reachedMaxIterations()) {
+    step: function step() {
+        if (this._reachedMaxIterations()) {
+            this._reset();
+        }
         this.running = false;
+        this._update();
+    },
+
+    _loop: function _loop() {
+        this._render();
+
+        if (this.running) {
+            this._update();
+        }
+
+        if (this._reachedMaxIterations()) {
+            this.running = false;
+        }
+
+        window.requestAnimationFrame(this._loop.bind(this));
+    },
+
+    _reachedMaxIterations: function _reachedMaxIterations() {
+        return this.currentIterations > this.settings.maxIterations;
+    },
+
+    _update: function _update() {
+        this.currentIterations++;
+        this.pso.update(this.settings);
+        this._logGBest();
+    },
+
+    _render: function _render() {
+        var _this = this;
+
+        this.graphics.drawBackground();
+
+        this.pso.particles.forEach(function (p) {
+            _this.graphics.drawParticle(p);
+
+            if (_this.settings.showTrace) {
+                _this.graphics.drawTrace(p);
+            }
+
+            if (_this.settings.showVelocity) {
+                _this.graphics.drawVelocity(p);
+            }
+
+            if (_this.settings.showPBest) {
+                _this.graphics.drawPBest(p);
+            }
+        });
+
+        if (this.settings.showGBest) {
+            this.graphics.drawGBest(this.pso.gBest);
+        }
+    },
+
+    _logGBest: function _logGBest() {
+        var value = this.fitnessFunction(this.pso.gBest);
+        _logger.Logger.setText('Valor máximo atual: ' + value.toFixed(5) + ' em ' + this.pso.gBest.toString());
+    },
+
+    _logScreenPosition: function _logScreenPosition(screenPos) {
+        var pos = this.graphics.fromScreenCoordinates(screenPos);
+        console.log(this.fitnessFunction(pos).toFixed(5) + ' @ ' + pos.toString());
+    },
+
+    _settingsChanged: function _settingsChanged(settings) {
+        this.settings = settings;
     }
-
-    window.requestAnimationFrame(this._loop.bind(this));
 };
 
-App.prototype._reachedMaxIterations = function () {
-    return this.currentIterations > this.settings.maxIterations;
-};
+var App = {
+    create: function create(canvas) {
+        var app = Object.create(proto);
+        app.controls = _controls.Controls.create(app._settingsChanged.bind(app), app.run.bind(app), app.step.bind(app));
+        app.settings = app.controls.currentSettings();
+        app.graphics = _graphics.Graphics.create(canvas);
+        app.fitnessFunction = sombrero;
+        app.running = false;
+        canvas.addHoverTrackingFunction(app._logScreenPosition.bind(app));
 
-App.prototype._update = function () {
-    this.currentIterations++;
-    this.pso.update(this.settings);
-    this._logGBest();
-};
-
-App.prototype._render = function () {
-    this.graphics.drawBackground();
-
-    this.pso.particles.forEach(function (p) {
-        this.graphics.drawParticle(p);
-
-        if (this.settings.showTrace) {
-            this.graphics.drawTrace(p);
-        }
-
-        if (this.settings.showVelocity) {
-            this.graphics.drawVelocity(p);
-        }
-
-        if (this.settings.showPBest) {
-            this.graphics.drawPBest(p);
-        }
-    }, this);
-
-    if (this.settings.showGBest) {
-        this.graphics.drawGBest(this.pso.gBest);
+        return app;
     }
-};
-
-App.prototype._logGBest = function () {
-    var value = this.fitnessFunction(this.pso.gBest);
-    _logger.Logger.setText('Valor máximo atual: ' + value.toFixed(5) + ' em ' + this.pso.gBest.toString());
-};
-
-App.prototype._logScreenPosition = function (screenPos) {
-    var pos = this.graphics.fromScreenCoordinates(screenPos);
-    console.log(this.fitnessFunction(pos).toFixed(5) + ' @ ' + pos.toString());
-};
-
-App.prototype._settingsChanged = function (settings) {
-    this.settings = settings;
 };
 
 exports.App = App;
@@ -129,59 +139,66 @@ exports.__esModule = true;
 
 var _vector = require('./vector');
 
-var Canvas = function Canvas(dom_canvas) {
-    this.dom_canvas = dom_canvas;
-    this.ctx = dom_canvas.getContext('2d');
-    this.width = dom_canvas.width;
-    this.height = dom_canvas.height;
-};
+var proto = {
 
-Canvas.prototype.clearBackground = function () {
-    this.ctx.clearRect(0, 0, this.width, this.height);
-};
+    clearBackground: function clearBackground() {
+        this.ctx.clearRect(0, 0, this.width, this.height);
+    },
 
-Canvas.prototype.fillCircle = function (pos, radius, color) {
-    this.ctx.beginPath();
-    this.ctx.arc(pos.x, pos.y, radius, 0, 2 * Math.PI);
-    this.ctx.closePath();
-    this.ctx.fillStyle = color;
-    this.ctx.fill();
-};
+    fillCircle: function fillCircle(pos, radius, color) {
+        this.ctx.beginPath();
+        this.ctx.arc(pos.x, pos.y, radius, 0, 2 * Math.PI);
+        this.ctx.closePath();
+        this.ctx.fillStyle = color;
+        this.ctx.fill();
+    },
 
-Canvas.prototype.drawLine = function (p1, p2, color) {
-    this.drawLines([p1, p2], color);
-};
+    drawLine: function drawLine(p1, p2, color) {
+        this.drawLines([p1, p2], color);
+    },
 
-Canvas.prototype.drawLines = function (points, color) {
-    this.ctx.beginPath();
-    this.ctx.closePath();
+    drawLines: function drawLines(points, color) {
+        this.ctx.beginPath();
+        this.ctx.closePath();
 
-    for (var i = 0; i < points.length - 1; i++) {
-        var p1 = points[i],
-            p2 = points[i + 1];
-        this.ctx.moveTo(p1.x, p1.y);
-        this.ctx.lineTo(p2.x, p2.y);
+        for (var i = 0; i < points.length - 1; i++) {
+            var p1 = points[i],
+                p2 = points[i + 1];
+            this.ctx.moveTo(p1.x, p1.y);
+            this.ctx.lineTo(p2.x, p2.y);
+        }
+
+        this.ctx.strokeStyle = color;
+        this.ctx.stroke();
+    },
+
+    drawCross: function drawCross(pos, size, color) {
+        this.ctx.beginPath();
+        this.ctx.moveTo(pos.x - size / 2, pos.y);
+        this.ctx.lineTo(pos.x + size / 2, pos.y);
+        this.ctx.moveTo(pos.x, pos.y - size / 2);
+        this.ctx.lineTo(pos.x, pos.y + size / 2);
+        this.ctx.closePath();
+        this.ctx.strokeStyle = color;
+        this.ctx.stroke();
+    },
+
+    addHoverTrackingFunction: function addHoverTrackingFunction(fun) {
+        this.dom_canvas.addEventListener('mousemove', function (event) {
+            fun(_vector.Vector.create({ x: event.offsetX, y: event.offsetY }));
+        });
     }
-
-    this.ctx.strokeStyle = color;
-    this.ctx.stroke();
 };
 
-Canvas.prototype.drawCross = function (pos, size, color) {
-    this.ctx.beginPath();
-    this.ctx.moveTo(pos.x - size / 2, pos.y);
-    this.ctx.lineTo(pos.x + size / 2, pos.y);
-    this.ctx.moveTo(pos.x, pos.y - size / 2);
-    this.ctx.lineTo(pos.x, pos.y + size / 2);
-    this.ctx.closePath();
-    this.ctx.strokeStyle = color;
-    this.ctx.stroke();
-};
-
-Canvas.prototype.addHoverTrackingFunction = function (fun) {
-    this.dom_canvas.addEventListener('mousemove', function (event) {
-        fun(new _vector.Vector({ x: event.offsetX, y: event.offsetY }));
-    });
+var Canvas = {
+    create: function create(dom_canvas) {
+        return Object.assign(Object.create(proto), {
+            dom_canvas: dom_canvas,
+            ctx: dom_canvas.getContext('2d'),
+            width: dom_canvas.width,
+            height: dom_canvas.height
+        });
+    }
 };
 
 exports.Canvas = Canvas;
@@ -215,34 +232,41 @@ function floatValue(field) {
     return Number.parseFloat(field.value);
 }
 
-var Controls = function Controls(changeSettings, run, step) {
-    this.changeSettings = changeSettings;
+var proto = {
+    changed: function changed() {
+        this.changeSettings(this.currentSettings());
+    },
 
-    Object.keys(inputs).forEach(function (k) {
-        inputs[k].addEventListener('change', this.changed.bind(this));
-    }, this);
-
-    buttons.run.addEventListener('click', run);
-    buttons.step.addEventListener('click', step);
+    currentSettings: function currentSettings() {
+        return {
+            numOfParticles: intValue(inputs.numberOfParticles),
+            c1: floatValue(inputs.c1),
+            c2: floatValue(inputs.c2),
+            k: floatValue(inputs.k),
+            dt: floatValue(inputs.dt),
+            maxIterations: intValue(inputs.maxIterations),
+            showGBest: inputs.showGBest.checked,
+            showPBest: inputs.showPBest.checked,
+            showTrace: inputs.showTrace.checked,
+            showVelocity: inputs.showVelocity.checked
+        };
+    }
 };
 
-Controls.prototype.changed = function () {
-    this.changeSettings(this.currentSettings());
-};
+var Controls = {
+    create: function create(changeSettings, run, step) {
+        var c = Object.create(proto);
+        c.changeSettings = changeSettings;
 
-Controls.prototype.currentSettings = function () {
-    return {
-        numOfParticles: intValue(inputs.numberOfParticles),
-        c1: floatValue(inputs.c1),
-        c2: floatValue(inputs.c2),
-        k: floatValue(inputs.k),
-        dt: floatValue(inputs.dt),
-        maxIterations: intValue(inputs.maxIterations),
-        showGBest: inputs.showGBest.checked,
-        showPBest: inputs.showPBest.checked,
-        showTrace: inputs.showTrace.checked,
-        showVelocity: inputs.showVelocity.checked
-    };
+        Object.keys(inputs).forEach(function (k) {
+            inputs[k].addEventListener('change', c.changed.bind(c));
+        });
+
+        buttons.run.addEventListener('click', run);
+        buttons.step.addEventListener('click', step);
+
+        return c;
+    }
 };
 
 exports.Controls = Controls;
@@ -258,73 +282,84 @@ var _utils = require('./utils');
 
 var _particle = require('./particle');
 
-function Graphics(canvas) {
-    this.canvas = canvas;
-    this.minX = -12;
-    this.maxX = -this.minX;
-    this.minY = this.minX * canvas.height / canvas.width;
-    this.maxY = -this.minY;
-    this.xSpan = this.maxX - this.minX;
-    this.ySpan = this.maxY - this.minY;
-}
+var proto = {
+
+    randomParticle: function randomParticle() {
+        return _particle.Particle.create(this._randomPosition(), _vector.Vector.ORIGIN, _utils.Utils.randColor());
+    },
+
+    toScreenCoordinates: function toScreenCoordinates(pos) {
+        var x = _utils.Utils.interpolate(pos.x, this.minX, this.maxX, 0, this.canvas.width),
+            y = _utils.Utils.interpolate(pos.y, this.minY, this.maxY, 0, this.canvas.height);
+        return _vector.Vector.create({ x: x, y: y });
+    },
+
+    fromScreenCoordinates: function fromScreenCoordinates(screenPos) {
+        var x = _utils.Utils.interpolate(screenPos.x, 0, this.canvas.width, this.minX, this.maxX),
+            y = _utils.Utils.interpolate(screenPos.y, 0, this.canvas.height, this.minY, this.maxY);
+        return _vector.Vector.create({ x: x, y: y });
+    },
+
+    drawBackground: function drawBackground() {
+        this.canvas.clearBackground();
+        this._drawGrid();
+    },
+
+    drawGBest: function drawGBest(gBest) {
+        this.canvas.drawCross(this.toScreenCoordinates(gBest), Graphics.gBestCrossSize, Graphics.gBestCrossColor);
+    },
+
+    drawParticle: function drawParticle(particle) {
+        this.canvas.fillCircle(this.toScreenCoordinates(particle.pos), Graphics.particleSize, particle.color);
+    },
+
+    drawTrace: function drawTrace(particle) {
+        var points = particle.posHistory.map(this.toScreenCoordinates.bind(this));
+        this.canvas.drawLines(points, particle.color);
+    },
+
+    drawVelocity: function drawVelocity(particle) {
+        var from = this.toScreenCoordinates(particle.pos),
+            to = this.toScreenCoordinates(particle.pos.add(particle.vel.scale(0.1)));
+        this.canvas.drawLine(from, to, 'darkgray');
+    },
+
+    drawPBest: function drawPBest(particle) {
+        this.canvas.drawCross(this.toScreenCoordinates(particle.pBest), Graphics.pBestCrossSize, particle.color);
+    },
+
+    _drawGrid: function _drawGrid() {
+        this.canvas.drawLine({ x: this.canvas.width / 2, y: 0 }, { x: this.canvas.width / 2,
+            y: this.canvas.height }, 'white');
+        this.canvas.drawLine({ x: 0, y: this.canvas.height / 2 }, { x: this.canvas.width,
+            y: this.canvas.height / 2 }, 'white');
+    },
+
+    _randomPosition: function _randomPosition() {
+        return _vector.Vector.create({ x: _utils.Utils.rand(this.minX, this.maxX),
+            y: _utils.Utils.rand(this.minY, this.maxY) });
+    }
+};
+
+var Graphics = {
+    create: function create(canvas) {
+        var g = Object.create(proto);
+        g.canvas = canvas;
+        g.minX = -12;
+        g.maxX = -g.minX;
+        g.minY = g.minX * canvas.height / canvas.width;
+        g.maxY = -g.minY;
+        g.xSpan = g.maxX - g.minX;
+        g.ySpan = g.maxY - g.minY;
+
+        return g;
+    }
+};
 
 Graphics.particleSize = 2;
 Graphics.gBestCrossColor = 'black';
 Graphics.gBestCrossSize = 20;
 Graphics.pBestCrossSize = 10;
-
-Graphics.prototype.randomParticle = function () {
-    return new _particle.Particle(this._randomPosition(), _vector.Vector.ORIGIN, _utils.Utils.randColor());
-};
-
-Graphics.prototype.toScreenCoordinates = function (pos) {
-    var x = _utils.Utils.interpolate(pos.x, this.minX, this.maxX, 0, this.canvas.width),
-        y = _utils.Utils.interpolate(pos.y, this.minY, this.maxY, 0, this.canvas.height);
-    return new _vector.Vector({ x: x, y: y });
-};
-
-Graphics.prototype.fromScreenCoordinates = function (screenPos) {
-    var x = _utils.Utils.interpolate(screenPos.x, 0, this.canvas.width, this.minX, this.maxX),
-        y = _utils.Utils.interpolate(screenPos.y, 0, this.canvas.height, this.minY, this.maxY);
-    return new _vector.Vector({ x: x, y: y });
-};
-
-Graphics.prototype.drawBackground = function () {
-    this.canvas.clearBackground();
-    this._drawGrid();
-};
-
-Graphics.prototype.drawGBest = function (gBest) {
-    this.canvas.drawCross(this.toScreenCoordinates(gBest), Graphics.gBestCrossSize, Graphics.gBestCrossColor);
-};
-
-Graphics.prototype.drawParticle = function (particle) {
-    this.canvas.fillCircle(this.toScreenCoordinates(particle.pos), Graphics.particleSize, particle.color);
-};
-
-Graphics.prototype.drawTrace = function (particle) {
-    this.canvas.drawLines(particle.posHistory.map(this.toScreenCoordinates.bind(this)), particle.color);
-};
-
-Graphics.prototype.drawVelocity = function (particle) {
-    var from = this.toScreenCoordinates(particle.pos),
-        to = this.toScreenCoordinates(particle.pos.add(particle.vel.scale(0.1)));
-    this.canvas.drawLine(from, to, 'darkgray');
-};
-
-Graphics.prototype.drawPBest = function (particle) {
-    this.canvas.drawCross(this.toScreenCoordinates(particle.pBest), Graphics.pBestCrossSize, particle.color);
-};
-
-Graphics.prototype._drawGrid = function () {
-    this.canvas.drawLine({ x: this.canvas.width / 2, y: 0 }, { x: this.canvas.width / 2, y: this.canvas.height }, 'white');
-    this.canvas.drawLine({ x: 0, y: this.canvas.height / 2 }, { x: this.canvas.width, y: this.canvas.height / 2 }, 'white');
-};
-
-Graphics.prototype._randomPosition = function () {
-    return new _vector.Vector({ x: _utils.Utils.rand(this.minX, this.maxX),
-        y: _utils.Utils.rand(this.minY, this.maxY) });
-};
 
 exports.Graphics = Graphics;
 
@@ -354,7 +389,8 @@ var _canvas = require('./canvas');
 
 var _app = require('./app');
 
-var app = new _app.App(new _canvas.Canvas(document.getElementById('drawing-canvas')));
+var canvas = _canvas.Canvas.create(document.getElementById('drawing-canvas')),
+    app = _app.App.create(canvas);
 app.init();
 
 },{"./app":1,"./canvas":2}],7:[function(require,module,exports){
@@ -362,17 +398,23 @@ app.init();
 
 exports.__esModule = true;
 
-var Particle = function Particle(pos, vel, color) {
-    this.pos = pos;
-    this.vel = vel;
-    this.posHistory = [pos];
-    this.pBest = this.pos;
-    this.color = color;
+var proto = {
+    move: function move(dt) {
+        this.pos = this.pos.add(this.vel.scale(dt));
+        this.posHistory.push(this.pos);
+    }
 };
 
-Particle.prototype.move = function (dt) {
-    this.pos = this.pos.add(this.vel.scale(dt));
-    this.posHistory.push(this.pos);
+var Particle = {
+    create: function create(pos, vel, color) {
+        return Object.assign(Object.create(proto), {
+            pos: pos,
+            vel: vel,
+            posHistory: [pos],
+            pBest: pos,
+            color: color
+        });
+    }
 };
 
 exports.Particle = Particle;
@@ -384,33 +426,43 @@ exports.__esModule = true;
 
 var _utils = require('./utils');
 
-function PSO(particles, fitnessFunction) {
-    this.particles = particles;
-    this.fitnessFunction = fitnessFunction;
-    this.gBest = this._calculateGBest();
-}
+var proto = {
 
-PSO.prototype.update = function (settings) {
-    this.particles.forEach(function (p) {
-        p.move(settings.dt);
-        p.pBest = this._fittestPosition([p.pBest, p.pos]);
-        p.vel = this._newVelocity(p, this.gBest, settings.c1, settings.c2, settings.k);
-    }, this);
-    this.gBest = this._calculateGBest();
+    update: function update(settings) {
+        var _this = this;
+
+        this.particles.forEach(function (p) {
+            p.move(settings.dt);
+            p.pBest = _this._fittestPosition([p.pBest, p.pos]);
+            p.vel = _this._newVelocity(p, _this.gBest, settings.c1, settings.c2, settings.k);
+        });
+        this.gBest = this._calculateGBest();
+    },
+
+    _calculateGBest: function _calculateGBest() {
+        return this._fittestPosition(this.particles.map(_utils.Utils.accessor('pBest')));
+    },
+
+    _fittestPosition: function _fittestPosition(positions) {
+        return _utils.Utils.maxBy(positions, this.fitnessFunction);
+    },
+
+    _newVelocity: function _newVelocity(particle, gBest, c1, c2, k) {
+        var gBestComponent = gBest.subtract(particle.pos).scale(c1 * Math.random()),
+            pBestComponent = particle.pBest.subtract(particle.pos).scale(c2 * Math.random());
+        return particle.vel.scale(k).add(gBestComponent).add(pBestComponent);
+    }
 };
 
-PSO.prototype._calculateGBest = function () {
-    return this._fittestPosition(this.particles.map(_utils.Utils.accessor('pBest')));
-};
-
-PSO.prototype._fittestPosition = function (positions) {
-    return _utils.Utils.maxBy(positions, this.fitnessFunction);
-};
-
-PSO.prototype._newVelocity = function (particle, gBest, c1, c2, k) {
-    var gBestComponent = gBest.subtract(particle.pos).scale(c1 * Math.random()),
-        pBestComponent = particle.pBest.subtract(particle.pos).scale(c2 * Math.random());
-    return particle.vel.scale(k).add(gBestComponent).add(pBestComponent);
+var PSO = {
+    create: function create(particles, fitnessFunction) {
+        var pso = Object.assign(Object.create(proto), {
+            particles: particles,
+            fitnessFunction: fitnessFunction
+        });
+        pso.gBest = pso._calculateGBest();
+        return pso;
+    }
 };
 
 exports.PSO = PSO;
@@ -465,35 +517,42 @@ exports.Utils = Utils;
 'use strict';
 
 exports.__esModule = true;
-var Vector = function Vector(coords) {
-    this.x = coords.x;
-    this.y = coords.y;
+var proto = {
+
+    add: function add(other) {
+        return Vector.create({ x: this.x + other.x,
+            y: this.y + other.y });
+    },
+
+    subtract: function subtract(other) {
+        return Vector.create({ x: this.x - other.x,
+            y: this.y - other.y });
+    },
+
+    scale: function scale(factor) {
+        return Vector.create({ x: factor * this.x,
+            y: factor * this.y });
+    },
+
+    squareDistance: function squareDistance(other) {
+        return Math.pow(this.x - other.x, 2) + Math.pow(this.y - other.y, 2);
+    },
+
+    toString: function toString() {
+        return '(' + this.x.toFixed(2) + ', ' + this.y.toFixed(2) + ')';
+    }
 };
 
-Vector.ORIGIN = new Vector({ x: 0, y: 0 });
-
-Vector.prototype.add = function (other) {
-    return new Vector({ x: this.x + other.x,
-        y: this.y + other.y });
+var Vector = {
+    create: function create(coords) {
+        return Object.assign(Object.create(proto), {
+            x: coords.x,
+            y: coords.y
+        });
+    }
 };
 
-Vector.prototype.subtract = function (other) {
-    return new Vector({ x: this.x - other.x,
-        y: this.y - other.y });
-};
-
-Vector.prototype.scale = function (factor) {
-    return new Vector({ x: factor * this.x,
-        y: factor * this.y });
-};
-
-Vector.prototype.squareDistance = function (other) {
-    return Math.pow(this.x - other.x, 2) + Math.pow(this.y - other.y, 2);
-};
-
-Vector.prototype.toString = function () {
-    return '(' + this.x.toFixed(2) + ', ' + this.y.toFixed(2) + ')';
-};
+Vector.ORIGIN = Vector.create({ x: 0, y: 0 });
 
 exports.Vector = Vector;
 
