@@ -1,4 +1,4 @@
-var proto = {
+let proto = {
 
     add(other) {
         return Vector.create({x: this.x + other.x,
@@ -25,7 +25,7 @@ var proto = {
     }
 };
 
-var Vector = {
+let Vector = {
     create(coords) {
         return Object.assign(Object.create(proto), {
             x: coords.x,

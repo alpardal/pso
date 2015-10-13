@@ -5,12 +5,12 @@ import {PSO} from './pso';
 import {Logger} from './logger';
 
 function sombrero(position) {
-    var x2 = position.x * position.x,
+    let x2 = position.x * position.x,
         y2 = position.y * position.y;
     return 6 * Math.cos(Math.sqrt(x2 + y2)) / (x2 + y2 + 6);
 }
 
-var proto = {
+let proto = {
 
     init() {
         this._reset();
@@ -19,7 +19,7 @@ var proto = {
 
     _reset() {
         this.currentIterations = 0;
-        var particles = Utils.initArray(this.settings.numOfParticles,
+        let particles = Utils.initArray(this.settings.numOfParticles,
                                         this.graphics.randomParticle.bind(this.graphics));
         this.pso = PSO.create(particles, this.fitnessFunction);
         Logger.clear();
@@ -86,13 +86,13 @@ var proto = {
     },
 
     _logGBest() {
-        var value = this.fitnessFunction(this.pso.gBest);
+        let value = this.fitnessFunction(this.pso.gBest);
         Logger.setText('Valor máximo atual: ' + value.toFixed(5) +
           ' em ' + this.pso.gBest.toString());
     },
 
     _logScreenPosition(screenPos) {
-        var pos = this.graphics.fromScreenCoordinates(screenPos);
+        let pos = this.graphics.fromScreenCoordinates(screenPos);
         console.log(this.fitnessFunction(pos).toFixed(5) + ' @ ' +
                     pos.toString());
     },
@@ -102,9 +102,9 @@ var proto = {
     }
 };
 
-var App = {
+let App = {
     create(canvas) {
-        var app = Object.create(proto);
+        let app = Object.create(proto);
         app.controls = Controls.create(app._settingsChanged.bind(app),
                                        app.run.bind(app),
                                        app.step.bind(app));

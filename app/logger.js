@@ -1,6 +1,6 @@
-var output = document.getElementById('output');
+let output = document.getElementById('output');
 
-var Logger = {
+let Logger = {
 
     clear: function() {
         output.textContent = '';

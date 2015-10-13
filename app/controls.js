@@ -1,4 +1,4 @@
-var inputs = {
+let inputs = {
         numberOfParticles: document.getElementById('numberOfParticles'),
         c1: document.getElementById('c1'),
         c2: document.getElementById('c2'),
@@ -23,7 +23,7 @@ function floatValue(field) {
     return Number.parseFloat(field.value);
 }
 
-var proto = {
+let proto = {
     changed() {
         this.changeSettings(this.currentSettings());
     },
@@ -44,9 +44,9 @@ var proto = {
     }
 };
 
-var Controls = {
+let Controls = {
     create(changeSettings, run, step) {
-        var c = Object.create(proto);
+        let c = Object.create(proto);
         c.changeSettings = changeSettings;
 
         Object.keys(inputs).forEach(k => {

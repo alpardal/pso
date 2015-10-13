@@ -1,6 +1,6 @@
 import {Vector} from './vector';
 
-var proto = {
+let proto = {
 
     clearBackground() {
         this.ctx.clearRect(0, 0, this.width, this.height);
@@ -22,8 +22,8 @@ var proto = {
         this.ctx.beginPath();
         this.ctx.closePath();
 
-        for (var i = 0; i < points.length-1; i++) {
-            var p1 = points[i],
+        for (let i = 0; i < points.length-1; i++) {
+            let p1 = points[i],
                 p2 = points[i+1];
             this.ctx.moveTo(p1.x, p1.y);
             this.ctx.lineTo(p2.x, p2.y);
@@ -51,7 +51,7 @@ var proto = {
     }
 };
 
-var Canvas = {
+let Canvas = {
     create(dom_canvas) {
         return Object.assign(Object.create(proto), {
             dom_canvas: dom_canvas,

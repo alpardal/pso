@@ -1,6 +1,6 @@
 import {Utils} from './utils';
 
-var proto = {
+let proto = {
 
     update(settings) {
         this.particles.forEach(p => {
@@ -21,7 +21,7 @@ var proto = {
     },
 
     _newVelocity(particle, gBest, c1, c2, k) {
-        var gBestComponent = gBest.subtract(particle.pos)
+        let gBestComponent = gBest.subtract(particle.pos)
                                   .scale(c1*Math.random()),
             pBestComponent = particle.pBest.subtract(particle.pos)
                                            .scale(c2*Math.random());
@@ -31,9 +31,9 @@ var proto = {
     }
 };
 
-var PSO = {
+let PSO = {
     create(particles, fitnessFunction) {
-        var pso = Object.assign(Object.create(proto), {
+        let pso = Object.assign(Object.create(proto), {
             particles: particles,
             fitnessFunction: fitnessFunction
         });

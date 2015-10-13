@@ -1,6 +1,6 @@
-var ffffff = Number.parseInt('ffffff', 16);
+let ffffff = Number.parseInt('ffffff', 16);
 
-var Utils = {
+let Utils = {
 
     rand: function(min, max) {
         return min + Math.random() * (max - min);
@@ -12,8 +12,8 @@ var Utils = {
     },
 
     initArray: function(size, generator) {
-        var array = [];
-        for (var i = 0; i < size; i++) {
+        let array = [];
+        for (let i = 0; i < size; i++) {
             array.push(generator());
         }
         return array;
@@ -28,7 +28,7 @@ var Utils = {
     },
 
     interpolate: function(value, oldMin, oldMax, newMin, newMax) {
-        var ratio = (value - oldMin) / (oldMax - oldMin);
+        let ratio = (value - oldMin) / (oldMax - oldMin);
         return newMin + ratio * (newMax - newMin);
     },
 

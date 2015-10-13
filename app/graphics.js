@@ -2,7 +2,7 @@ import {Vector} from './vector';
 import {Utils} from './utils';
 import {Particle} from './particle';
 
-var proto = {
+let proto = {
 
     randomParticle() {
         return Particle.create(this._randomPosition(), Vector.ORIGIN,
@@ -10,7 +10,7 @@ var proto = {
     },
 
     toScreenCoordinates(pos) {
-        var x = Utils.interpolate(pos.x, this.minX, this.maxX,
+        let x = Utils.interpolate(pos.x, this.minX, this.maxX,
                                          0, this.canvas.width),
             y = Utils.interpolate(pos.y, this.minY, this.maxY,
                                          0, this.canvas.height);
@@ -18,7 +18,7 @@ var proto = {
     },
 
     fromScreenCoordinates(screenPos) {
-        var x = Utils.interpolate(screenPos.x, 0, this.canvas.width,
+        let x = Utils.interpolate(screenPos.x, 0, this.canvas.width,
                                                this.minX, this.maxX),
             y = Utils.interpolate(screenPos.y, 0, this.canvas.height,
                                                this.minY, this.maxY);
@@ -42,13 +42,13 @@ var proto = {
     },
 
     drawTrace(particle) {
-        var points = particle.posHistory
+        let points = particle.posHistory
                              .map(this.toScreenCoordinates.bind(this));
         this.canvas.drawLines(points, particle.color);
     },
 
     drawVelocity(particle) {
-        var from = this.toScreenCoordinates(particle.pos),
+        let from = this.toScreenCoordinates(particle.pos),
             to = this.toScreenCoordinates(
                             particle.pos.add(particle.vel.scale(0.1)));
         this.canvas.drawLine(from, to, 'darkgray');
@@ -74,9 +74,9 @@ var proto = {
     }
 };
 
-var Graphics = {
+let Graphics = {
     create(canvas) {
-        var g = Object.create(proto);
+        let g = Object.create(proto);
         g.canvas = canvas;
         g.minX = -12;
         g.maxX = -g.minX;
