@@ -2,11 +2,11 @@ let output = document.getElementById('output');
 
 let Logger = {
 
-    clear: function() {
+    clear() {
         output.textContent = '';
     },
 
-    setText: function(text) {
+    setText(text) {
         output.textContent = text;
     }
 };

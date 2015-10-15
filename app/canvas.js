@@ -45,7 +45,7 @@ let proto = {
     },
 
     addHoverTrackingFunction(fun) {
-        this.dom_canvas.addEventListener('mousemove', function(event) {
+        this.dom_canvas.addEventListener('mousemove', event => {
             fun(Vector.create({x: event.offsetX, y: event.offsetY}));
         });
     }

@@ -13,7 +13,7 @@ let proto = {
     },
 
     _calculateGBest() {
-        return this._fittestPosition(this.particles.map(Utils.accessor('pBest')));
+        return this._fittestPosition(this.particles.map(p => p.pBest));
     },
 
     _fittestPosition(positions) {
