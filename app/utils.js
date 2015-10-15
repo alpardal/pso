@@ -7,8 +7,7 @@ let Utils = {
     },
 
     randColor() {
-        return '#' +
-            Math.floor(Math.random()*ffffff).toString(16);
+        return '#' + Math.floor(Math.random()*ffffff).toString(16);
     },
 
     initArray(size, generator) {
@@ -32,5 +31,6 @@ let Utils = {
         return newMin + ratio * (newMax - newMin);
     }
 };
+
 
 export {Utils};
