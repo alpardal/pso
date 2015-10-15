@@ -1,15 +1,22 @@
 
-var Particle = function(pos, vel, color) {
-    this.pos = pos;
-    this.vel = vel;
-    this.posHistory = [pos];
-    this.pBest = this.pos;
-    this.color = color;
+let proto = {
+    move(dt) {
+        this.pos = this.pos.add(this.vel.scale(dt));
+        this.posHistory.push(this.pos);
+    }
 };
 
-Particle.prototype.move = function(dt) {
-    this.pos = this.pos.add(this.vel.scale(dt));
-    this.posHistory.push(this.pos);
+let Particle = {
+    create(pos, vel, color) {
+        return Object.assign(Object.create(proto), {
+            pos: pos,
+            vel: vel,
+            posHistory: [pos],
+            pBest: pos,
+            color: color
+        });
+    }
 };
+
 
 export {Particle};

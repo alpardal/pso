@@ -7,7 +7,10 @@ module.exports = function(grunt) {
                         ['babelify', {
                             loose: 'all'
                         }]
-                    ]
+                    ],
+                    browserifyOptions: {
+                        debug: true
+                    }
                 },
                 files: {
                     './public/javascripts/app.js': ['./app/*.js']
