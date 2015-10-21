@@ -20,27 +20,27 @@
         <table>
           <tr>
             <td>Número de Partículas:</td>
-            <td><input type="text" value="10" id="numberOfParticles" /></td>
+            <td><input type="number" value="10" id="numberOfParticles" required /></td>
           </tr>
           <tr>
             <td>c1:</td>
-            <td><input type="text" value="2" id="c1" /></td>
+            <td><input type="number" value="2" id="c1" step="0.1" required /></td>
           </tr>
           <tr>
             <td>c2:</td>
-            <td><input type="text" value="1.5"id="c2" /></td>
+            <td><input type="number" value="1.5"id="c2" step="0.1" required /></td>
           </tr>
           <tr>
             <td>k:</td>
-            <td><input type="text" value="0.95" id="k" /></td>
+            <td><input type="number" value="0.95" id="k" step="0.01" required /></td>
           </tr>
           <tr>
             <td>dt:</td>
-            <td><input type="text" value="0.01" id="dt" /></td>
+            <td><input type="number" value="0.01" id="dt" step="0.01" required /></td>
           </tr>
           <tr>
             <td>Max. iterações:</td>
-            <td><input type="text" value="100" id="maxIterations" /></td>
+            <td><input type="number" value="100" id="maxIterations" step="20" required /></td>
           </tr>
           <tr>
             <td><label for="showGBest">

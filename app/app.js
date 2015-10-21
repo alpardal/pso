@@ -87,14 +87,13 @@ let proto = {
 
     _logGBest() {
         let value = this.fitnessFunction(this.pso.gBest);
-        Logger.setText('Valor máximo atual: ' + value.toFixed(5) +
-          ' em ' + this.pso.gBest.toString());
+        Logger.setText(`Valor máximo atual: ${value.toFixed(5)}` +
+          ` em ${this.pso.gBest}`);
     },
 
     _logScreenPosition(screenPos) {
         let pos = this.graphics.fromScreenCoordinates(screenPos);
-        console.log(this.fitnessFunction(pos).toFixed(5) + ' @ ' +
-                    pos.toString());
+        console.log(`${this.fitnessFunction(pos).toFixed(5)} @ ${pos}`);
     },
 
     _settingsChanged(settings) {

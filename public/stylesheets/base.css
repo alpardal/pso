@@ -34,3 +34,7 @@ canvas {
     clear: both;
     padding-top: 10px;
 }
+
+input:invalid {
+    border-color: red;
+}
