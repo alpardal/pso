@@ -18,7 +18,7 @@ let Utils = {
         return array;
     },
 
-    maxBy(items, transform) {
+    maxBy(transform, items) {
         return items.map(i => (
             {item: i, value: transform(i)}
         )).reduce((best, current) => (
