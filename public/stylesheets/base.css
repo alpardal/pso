@@ -1,3 +1,29 @@
+body {
+  background: #eef;
+}
+
+header {
+  display: inline-block;
+  color: #333;
+  margin-bottom: 0.3em;
+  font-family: sans-serif;
+}
+
+h1 {
+  font-size: 1.5em;
+  margin-bottom: 0.2em;
+}
+
+h2 {
+  margin-top: 0;
+  padding-left: 0.5em;
+  font-size: 0.9em;
+}
+
+h2 a {
+  color: #33a;
+}
+
 canvas {
     float: left;
     outline: solid thin darkgray;
