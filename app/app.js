@@ -66,23 +66,12 @@ let proto = {
 
         this.pso.particles.forEach(p => {
             this.graphics.drawParticle(p);
-
-            if (this.settings.showTrace) {
-                this.graphics.drawTrace(p);
-            }
-
-            if (this.settings.showVelocity) {
-                this.graphics.drawVelocity(p);
-            }
-
-            if (this.settings.showPBest) {
-                this.graphics.drawPBest(p);
-            }
+            this.drawTrace(p);
+            this.drawVelocity(p);
+            this.drawPBest(p);
         });
 
-        if (this.settings.showGBest) {
-            this.graphics.drawGBest(this.pso.gBest);
-        }
+        this.drawGBest(this.pso.gBest);
     },
 
     _logGBest() {
@@ -98,6 +87,19 @@ let proto = {
 
     _settingsChanged(settings) {
         this.settings = settings;
+        this.drawTrace = settings.showTrace ?
+                            this.graphics.drawTrace.bind(this.graphics) :
+                            Utils.doNothing;
+        this.drawVelocity = settings.showVelocity ?
+                                this.graphics.drawVelocity.bind(this.graphics) :
+                                Utils.doNothing;
+        this.drawPBest = settings.showPBest ?
+                            this.graphics.drawPBest.bind(this.graphics) :
+                            Utils.doNothing;
+
+        this.drawGBest = settings.showGBest ?
+                            this.graphics.drawGBest.bind(this.graphics) :
+                            Utils.doNothing;
     }
 };
 
@@ -107,10 +109,10 @@ let App = {
         app.controls = Controls.create(app._settingsChanged.bind(app),
                                        app.run.bind(app),
                                        app.step.bind(app));
-        app.settings = app.controls.currentSettings();
         app.graphics = Graphics.create(canvas);
         app.fitnessFunction = sombrero;
         app.running = false;
+        app.controls.changed();
         canvas.addHoverTrackingFunction(app._logScreenPosition.bind(app));
 
         return app;
